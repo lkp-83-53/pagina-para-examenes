@@ -77,8 +77,30 @@ La página trae exámenes ya cargados, que aparecen en un desplegable en la pant
 
 | Balotario | Contenido |
 |---|---|
+| Examen de Admisión — Banco General | **90 preguntas, 30 por examen.** Nivel San Marcos / Callao, todas las materias |
 | Álgebra — Admisión San Marcos | 26 preguntas: lógica proposicional, exponentes, productos notables, ecuaciones, división de polinomios, inecuaciones, valor absoluto, funciones, logaritmos, complejos y análisis dimensional |
 | Simulacro de muestra | 7 preguntas de prueba, para ver cómo funciona |
+
+### Composición del banco general
+
+Cada examen toma 30 preguntas repartidas entre las 16 materias en la misma proporción
+que tienen en el banco:
+
+| Materia | En el banco | Por examen |
+|---|---|---|
+| Razonamiento Matemático | 12 | 4 |
+| Razonamiento Verbal | 9 | 3 |
+| Álgebra | 9 | 3 |
+| Aritmética · Geometría · Trigonometría · Física · Química · Biología · Historia del Perú | 6 c/u | 2 c/u |
+| Comprensión Lectora · Geografía · Economía · Lenguaje · Literatura · Educación Cívica | 3 c/u | 1 c/u |
+
+### Rotación
+
+La página recuerda qué preguntas ya salieron y el siguiente intento toma otras.
+Con 90 preguntas y 30 por examen salen **tres exámenes completos sin repetir ni una**.
+Al agotarse el banco, el ciclo se reinicia solo.
+
+El campo **Preguntas por examen** del editor controla cuántas se toman: `0` significa todas.
 
 Se pueden abrir en el editor desde el panel **Balotario** → *Abrir en el editor*, para usarlos
 como punto de partida.

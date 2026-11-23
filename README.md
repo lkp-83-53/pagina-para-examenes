@@ -71,6 +71,18 @@ incrustada como data URL, o queda vacío.
 Es un único archivo `index.html` sin build ni dependencias: funciona abriéndolo directo
 o publicado en GitHub Pages.
 
+## Balotarios incluidos
+
+La página trae exámenes ya cargados, que aparecen en un desplegable en la pantalla de acceso:
+
+| Balotario | Contenido |
+|---|---|
+| Álgebra — Admisión San Marcos | 26 preguntas: lógica proposicional, exponentes, productos notables, ecuaciones, división de polinomios, inecuaciones, valor absoluto, funciones, logaritmos, complejos y análisis dimensional |
+| Simulacro de muestra | 7 preguntas de prueba, para ver cómo funciona |
+
+Se pueden abrir en el editor desde el panel **Balotario** → *Abrir en el editor*, para usarlos
+como punto de partida.
+
 ## Fórmulas en LaTeX
 
 La página renderiza matemática con [KaTeX](https://katex.org), cargado desde jsDelivr.

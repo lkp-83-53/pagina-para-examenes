@@ -54,7 +54,8 @@ button{font-family:inherit}
 .card-login h2{font-size:16.5px;color:var(--accent-d);text-align:center;margin:0 0 22px;line-height:1.45;font-weight:700}
 .field{margin-bottom:14px}
 .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;font-weight:600}
-.field input{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 13px;font-size:14.5px;outline:0;background:#fafcfb}
+.field input,.field .sel{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 13px;font-size:14.5px;outline:0;background:#fafcfb;font-family:inherit;color:var(--ink)}
+.field .sel:focus{border-color:var(--accent)}
 .field input:focus{border-color:var(--accent)}
 .check{display:flex;gap:9px;align-items:flex-start;margin:16px 0 6px;font-size:13px;color:#415b53;line-height:1.5}
 .check input{margin-top:2px;width:16px;height:16px;accent-color:var(--accent);flex:0 0 auto}
@@ -205,6 +206,8 @@ textarea.in{resize:vertical;line-height:1.55}
     <div class="card-login">
       <div class="logo" id="ac-logo">EXAMEN</div>
       <h2 id="ac-sub">Examen de Admisión</h2>
+      <div class="field hide" id="campo-examen"><label>Examen</label>
+        <select class="sel" id="in-examen"></select></div>
       <div class="field"><label>Nombre del postulante</label><input id="in-nombre" placeholder="Nombres y apellidos" autocomplete="off"></div>
       <div class="field"><label>DNI / Código</label><input id="in-dni" placeholder="Ej. 71234567" autocomplete="off"></div>
       <label class="check"><input type="checkbox" id="in-acepto">
@@ -348,6 +351,12 @@ textarea.in{resize:vertical;line-height:1.55}
       <p style="font-size:14px;color:#4b6560;line-height:1.7;margin:0 0 14px">
         Guarda el examen como archivo <b>.json</b> en tu carpeta de balotarios, o carga uno que ya tengas.
         Las imagenes quedan incrustadas dentro del archivo, asi que no se pierden al moverlo.</p>
+      <div class="row" style="margin-bottom:16px;max-width:620px">
+        <div><label class="lab">Balotarios incluidos en la página</label>
+          <select class="in" id="ed-biblio"></select></div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn ghost" id="btn-abrir-biblio" style="width:100%">Abrir en el editor</button></div>
+      </div>
       <button class="btn" id="btn-guardar-bal">Guardar balotario (.json)</button>
       <button class="btn ghost" id="btn-cargar-bal">Cargar balotario (.json)</button>
       <input type="file" id="file-bal" accept=".json,application/json" class="hide">
@@ -423,6 +432,12 @@ const DEFAULT = {
   ]
 };
 
+/* ---------- Balotarios incluidos ---------- */
+const BIBLIOTECA = [
+  { id:"algebra-sm", nombre:"Álgebra — Admisión San Marcos (26 preguntas)", cfg: {"titulo":"Álgebra — Admisión San Marcos","sub":"Preparación preuniversitaria · basado en el formulario de Álgebra","logo":"ÁLGEBRA","duracion":60,"notaMin":60,"aleatorio":false,"mezclarAlt":false,"resultados":true,"antifraude":true,"maxSalidas":3,"maxSegFuera":60,"preguntas":[{"t":"Lógica Proposicional","p":"Clasifica el esquema molecular: $$(p \\wedge \\sim q) \\to p$$","o":["Contradicción","Contingencia","Tautología","Es una proposición simple"],"c":2,"e":"La matriz principal resulta $V\\,V\\,V\\,V$ para las cuatro combinaciones de $p$ y $q$. Al ser toda la columna verdadera, el esquema es una tautología.","img":"","imgNom":""},{"t":"Lógica Proposicional","p":"¿A qué equivale $\\sim(p \\vee q)$?","o":["$p \\to q$","$\\sim p \\;\\vee \\sim q$","$p \\wedge q$","$\\sim p \\;\\wedge \\sim q$"],"c":3,"e":"Por la ley de De Morgan, la negación entra cambiando $\\vee$ por $\\wedge$: $\\sim(p \\vee q) \\equiv \\;\\sim p \\;\\wedge \\sim q$.","img":"","imgNom":""},{"t":"Lógica Proposicional","p":"El condicional $p \\to q$ es falso únicamente cuando:","o":["ambas son falsas","$p$ es verdadera y $q$ es falsa","ambas son verdaderas","$p$ es falsa y $q$ es verdadera"],"c":1,"e":"El condicional es una promesa: solo se rompe cuando se cumple el antecedente pero no el consecuente, es decir $V \\to F$.","img":"","imgNom":""},{"t":"Teoría de Exponentes","p":"Simplifica: $$E = \\frac{2^{\\,n+3} + 2^{\\,n+1}}{2^{\\,n+1}}$$","o":["$4$","$3$","$10$","$5$"],"c":3,"e":"Factorizamos $2^{n+1}$ en el numerador: $2^{n+3} = 4\\cdot 2^{n+1}$, entonces $E = \\frac{2^{n+1}(4+1)}{2^{n+1}} = 5$.","img":"","imgNom":""},{"t":"Teoría de Exponentes","p":"Calcula: $\\left(\\dfrac{2}{3}\\right)^{-2}$","o":["$\\dfrac{3}{2}$","$-\\dfrac{4}{9}$","$\\dfrac{4}{9}$","$\\dfrac{9}{4}$"],"c":3,"e":"El exponente negativo invierte la fracción: $\\left(\\frac{a}{b}\\right)^{-n} = \\left(\\frac{b}{a}\\right)^{n}$, así que resulta $\\left(\\frac{3}{2}\\right)^2 = \\frac{9}{4}$.","img":"","imgNom":""},{"t":"Teoría de Exponentes","p":"Si $a \\neq 0$, entonces $a^{0}$ es igual a:","o":["$0$","No está definido","$a$","$1$"],"c":3,"e":"Toda base distinta de cero elevada al exponente cero es igual a la unidad.","img":"","imgNom":""},{"t":"Productos Notables","p":"Si $a + b = 5$ y $ab = 6$, calcula $a^{2} + b^{2}$.","o":["$13$","$11$","$25$","$37$"],"c":0,"e":"De $(a+b)^2 = a^2 + 2ab + b^2$ despejamos: $a^2+b^2 = (a+b)^2 - 2ab = 25 - 12 = 13$.","img":"","imgNom":""},{"t":"Productos Notables","p":"Según las equivalencias de Legendre, $(a+b)^{2} - (a-b)^{2}$ es igual a:","o":["$2(a^2+b^2)$","$a^2-b^2$","$4ab$","$2ab$"],"c":2,"e":"Al desarrollar ambos binomios, los cuadrados se cancelan y los términos centrales se suman: $4ab$.","img":"","imgNom":""},{"t":"Productos Notables","p":"Efectúa: $(x+3)(x-3) + 9$","o":["$x^{2}-9$","$x^{2}-18$","$x^{2}$","$x^{2}+9$"],"c":2,"e":"Por diferencia de cuadrados, $(x+3)(x-3) = x^2 - 9$. Al sumar $9$ queda $x^2$.","img":"","imgNom":""},{"t":"Ecuaciones","p":"Halla el producto de las raíces de $2x^{2} - 5x - 3 = 0$.","o":["$\\dfrac{3}{2}$","$-3$","$-\\dfrac{3}{2}$","$\\dfrac{5}{2}$"],"c":2,"e":"Por Cardano–Vieta, el producto de raíces es $\\frac{c}{a} = \\frac{-3}{2}$. En efecto, las raíces son $3$ y $-\\frac{1}{2}$.","img":"","imgNom":""},{"t":"Ecuaciones","p":"¿Para qué valores de $k$ la ecuación $x^{2} + kx + 9 = 0$ tiene raíz doble?","o":["$k = \\pm 9$","$k = \\pm 3$","$k = 6$","$k = \\pm 6$"],"c":3,"e":"Hay raíz doble cuando el discriminante se anula: $\\Delta = k^2 - 4(1)(9) = 0 \\Rightarrow k^2 = 36 \\Rightarrow k = \\pm 6$.","img":"","imgNom":""},{"t":"Ecuaciones","p":"Resuelve: $$\\frac{x}{2} + \\frac{x}{3} = 5$$","o":["$x = 6$","$x = 15$","$x = 5$","$x = 30$"],"c":0,"e":"Multiplicando por $6$: $3x + 2x = 30 \\Rightarrow 5x = 30 \\Rightarrow x = 6$.","img":"","imgNom":""},{"t":"División de Polinomios","p":"Calcula el resto de dividir $P(x) = x^{3} - 2x + 5$ entre $x - 2$.","o":["$1$","$9$","$5$","$13$"],"c":1,"e":"Por el teorema del resto, el residuo es $P(2) = 8 - 4 + 5 = 9$.","img":"","imgNom":""},{"t":"División de Polinomios","p":"Si $(x-1)$ es factor de $P(x) = x^{3} + ax - 4$, halla el valor de $a$.","o":["$a = 3$","$a = 1$","$a = -3$","$a = 4$"],"c":0,"e":"Por el teorema del factor, $P(1) = 0$: $1 + a - 4 = 0 \\Rightarrow a = 3$.","img":"","imgNom":""},{"t":"Inecuaciones","p":"Resuelve: $x^{2} - 5x + 6 < 0$","o":["$[\\,2\\,;\\,3\\,]$","$\\langle 3\\,;\\,+\\infty \\rangle$","$\\langle 2\\,;\\,3 \\rangle$","$\\langle -\\infty\\,;\\,2 \\rangle \\cup \\langle 3\\,;\\,+\\infty \\rangle$"],"c":2,"e":"Las raíces son $2$ y $3$ y el discriminante es positivo. Para una cuadrática de coeficiente principal positivo, la expresión es negativa entre sus raíces: $2 < x < 3$.","img":"","imgNom":""},{"t":"Inecuaciones","p":"Resuelve: $2x - 7 \\geq 3$","o":["$\\langle 5\\,;\\,+\\infty \\rangle$","$[\\,5\\,;\\,+\\infty \\rangle$","$\\langle -\\infty\\,;\\,5\\,]$","$[\\,2\\,;\\,+\\infty \\rangle$"],"c":1,"e":"Sumando $7$: $2x \\geq 10 \\Rightarrow x \\geq 5$. El corchete incluye al $5$ porque la desigualdad no es estricta.","img":"","imgNom":""},{"t":"Valor Absoluto","p":"Resuelve: $|2x - 1| = 5$","o":["$\\{3\\}$","$\\{3\\,;\\,2\\}$","$\\{3\\,;\\,-2\\}$","$\\{-3\\,;\\,2\\}$"],"c":2,"e":"Se abren dos casos: $2x-1 = 5 \\Rightarrow x = 3$, y $2x-1 = -5 \\Rightarrow x = -2$.","img":"","imgNom":""},{"t":"Valor Absoluto","p":"Resuelve: $|x - 4| < 3$","o":["$\\langle 1\\,;\\,7 \\rangle$","$\\langle -7\\,;\\,7 \\rangle$","$[\\,1\\,;\\,7\\,]$","$\\langle -\\infty\\,;\\,1 \\rangle$"],"c":0,"e":"Para $a>0$: $|x| < a \\iff -a < x < a$. Entonces $-3 < x-4 < 3 \\Rightarrow 1 < x < 7$.","img":"","imgNom":""},{"t":"Funciones","p":"Determina el dominio de $F(x) = \\sqrt{x - 5}$.","o":["$\\langle -\\infty\\,;\\,5\\,]$","$\\R$","$[\\,5\\,;\\,+\\infty \\rangle$","$\\langle 5\\,;\\,+\\infty \\rangle$"],"c":2,"e":"El radicando de una raíz cuadrada no puede ser negativo: $x - 5 \\geq 0 \\Rightarrow x \\geq 5$.","img":"","imgNom":""},{"t":"Funciones","p":"Halla el vértice de la parábola $F(x) = x^{2} - 6x + 5$.","o":["$(-3\\,;\\,-4)$","$(3\\,;\\,-4)$","$(3\\,;\\,4)$","$(6\\,;\\,5)$"],"c":1,"e":"La abscisa del vértice es $x = -\\frac{b}{2a} = \\frac{6}{2} = 3$, y la ordenada $F(3) = 9 - 18 + 5 = -4$. Como $a > 0$, es un mínimo.","img":"","imgNom":""},{"t":"Funciones","p":"Si $F(x) = 2x + 1$ y $G(x) = x^{2}$, calcula $(F \\circ G)(3)$.","o":["$49$","$19$","$7$","$37$"],"c":1,"e":"Primero se aplica la función interior: $G(3) = 9$. Luego $F(9) = 2(9) + 1 = 19$.","img":"","imgNom":""},{"t":"Funciones","p":"Una función $F$ es impar cuando cumple:","o":["$F(x+T) = F(x)$","$F(-x) = -F(x)$","$F(x_1) < F(x_2)$ si $x_1 < x_2$","$F(-x) = F(x)$"],"c":1,"e":"La función impar es simétrica respecto del origen: $F(-x) = -F(x)$. La condición $F(-x)=F(x)$ corresponde a la función par.","img":"","imgNom":""},{"t":"Logaritmos","p":"Calcula: $\\log_{2} 32$","o":["$4$","$5$","$6$","$16$"],"c":1,"e":"Por definición, $\\log_a x = y \\iff a^y = x$. Como $2^5 = 32$, el logaritmo vale $5$.","img":"","imgNom":""},{"t":"Logaritmos","p":"Calcula: $\\log 2 + \\log 5$","o":["$0$","$10$","$1$","$7$"],"c":2,"e":"El logaritmo de un producto es la suma de logaritmos: $\\log 2 + \\log 5 = \\log 10 = 1$, pues la base es $10$.","img":"","imgNom":""},{"t":"Números Complejos","p":"Calcula el valor de $i^{\\,27}$.","o":["$-i$","$i$","$1$","$-1$"],"c":0,"e":"Las potencias de $i$ se repiten cada $4$. Como $27 = 4(6) + 3$, se tiene $i^{27} = i^{3} = -i$.","img":"","imgNom":""},{"t":"Análisis Dimensional","p":"En la siguiente fórmula física para determinar la posición de una partícula:\n$$x = K_1 + K_2\\,t + c\\,K_3\\,t^{2}$$\ndonde $x$: distancia, $t$: tiempo y $c$: número adimensional. Determina las unidades de $\\dfrac{K_1 \\cdot K_2}{K_3}$.","o":["$L\\,T^{-1}$","$L^{2}\\,T^{-1}$","$L\\,T$","$L$"],"c":2,"e":"Por homogeneidad dimensional: $[K_1] = L$, $[K_2] = L\\,T^{-1}$ y $[K_3] = L\\,T^{-2}$. Entonces $\\frac{[K_1][K_2]}{[K_3]} = \\frac{L \\cdot L T^{-1}}{L T^{-2}} = L\\,T$, es decir $m \\cdot s$.","img":"","imgNom":""}],"reglas":["El examen es individual: no se permite ayuda de terceros ni material de consulta.","Una vez iniciado, el cronómetro no se detiene aunque cierres la ventana.","Puedes avanzar, retroceder y marcar preguntas para revisarlas antes de enviar.","Al terminar el tiempo el examen se envía automáticamente con lo respondido.","Solo se admite una respuesta por pregunta.","No debes salir de la página ni cambiar de pestaña: el sistema lo detecta y puede anular tu examen."]} },
+  { id:"muestra", nombre:"Simulacro de muestra (7 preguntas)", cfg: DEFAULT }
+];
+
 /* ---------- Utilidades ---------- */
 function b64enc(obj){ return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replace(/\+/g,"-").replace(/\//g,"_"); }
 function b64dec(s){ try{ return JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g,"+").replace(/_/g,"/"))))); }catch(e){ return null; } }
@@ -488,11 +503,44 @@ let tick = null;
     const c = b64dec(m[1]);
     if(c && c.preguntas && c.preguntas.length){ CFG = normalizar(c); MODO_ALUMNO = true; }
   }
-  if(!CFG) CFG = normalizar(load() || DEFAULT);
-  if(MODO_ALUMNO) $("#lnk-editor").classList.add("hide");
+  if(MODO_ALUMNO){
+    $("#lnk-editor").classList.add("hide");
+    $("#lnk-codigo").classList.add("hide");
+  } else {
+    construirSelector();
+  }
+  if(!CFG) CFG = normalizar(DEFAULT);
   pintarAcceso();
   show("view-acceso");
 })();
+
+function opcionesExamen(){
+  const arr = [];
+  const g = load();
+  if(g && g.preguntas && g.preguntas.length)
+    arr.push({ id:"__local", nombre:"Mi examen guardado — "+(g.titulo||"sin título")+" ("+g.preguntas.length+" preguntas)", cfg:g });
+  BIBLIOTECA.forEach(b=>arr.push(b));
+  return arr;
+}
+
+function construirSelector(mantener){
+  const ops = opcionesExamen();
+  const sel = $("#in-examen");
+  sel.innerHTML = "";
+  ops.forEach((o,i)=>{
+    const op = document.createElement("option");
+    op.value = String(i); op.textContent = o.nombre;
+    sel.appendChild(op);
+  });
+  $("#campo-examen").classList.toggle("hide", ops.length <= 1);
+  sel.value = "0";
+  if(!mantener) CFG = normalizar(ops[0].cfg);
+  sel.onchange = ()=>{
+    CFG = normalizar(opcionesExamen()[parseInt(sel.value,10)].cfg);
+    pintarAcceso();
+    $("#ac-err").textContent = "";
+  };
+}
 
 function normalizar(c){
   const d = Object.assign({}, DEFAULT, c);
@@ -944,11 +992,11 @@ function leerEditor(){
   CFG.preguntas=CFG.preguntas.filter(q=>q.p.trim() && q.o.filter(o=>o.trim()).length>=2);
 }
 
-$("#btn-guardar").onclick = ()=>{ leerEditor(); save(CFG); pintarPreguntasEd(); pintarAcceso(); toast("Examen guardado en este navegador"); };
-$("#btn-probar").onclick = ()=>{ leerEditor(); save(CFG); pintarAcceso();
+$("#btn-guardar").onclick = ()=>{ leerEditor(); save(CFG); pintarPreguntasEd(); construirSelector(true); pintarAcceso(); toast("Examen guardado en este navegador"); };
+$("#btn-probar").onclick = ()=>{ leerEditor(); save(CFG); construirSelector(true); pintarAcceso();
   if(!CFG.preguntas.length){ toast("Agrega al menos una pregunta completa"); return; }
   show("view-acceso"); };
-$("#btn-salir-editor").onclick = ()=>{ leerEditor(); save(CFG); pintarAcceso(); show("view-acceso"); };
+$("#btn-salir-editor").onclick = ()=>{ leerEditor(); save(CFG); construirSelector(true); pintarAcceso(); show("view-acceso"); };
 
 $("#btn-codigo").onclick = ()=>{
   leerEditor(); save(CFG);
@@ -999,6 +1047,24 @@ $("#btn-guardar-bal").onclick = ()=>{
       "Muévelo a tu carpeta de balotarios. Si no se descargó, estás en la vista previa de Claude: "+
       "abre la página publicada o usa el código del examen.";
   }catch(e){ $("#bal-info").textContent = "Este visor no permite descargas. Usa el código del examen."; }
+};
+(function(){
+  const sel=$("#ed-biblio");
+  BIBLIOTECA.forEach((b,i)=>{
+    const o=document.createElement("option"); o.value=String(i); o.textContent=b.nombre; sel.appendChild(o);
+  });
+})();
+$("#btn-abrir-biblio").onclick = ()=>{
+  const b = BIBLIOTECA[parseInt($("#ed-biblio").value,10)];
+  if(!b) return;
+  modal("Abrir balotario incluido",
+    '<p>Se va a cargar <b>'+esc(b.nombre)+'</b> en el editor. Si tienes cambios sin guardar en el examen actual, se perderán.</p>',
+    [{txt:"Cancelar"},{txt:"Abrir",cls:"",fn:()=>{
+      CFG = normalizar(JSON.parse(JSON.stringify(b.cfg)));
+      cargarEditor(); pintarAcceso();
+      $("#bal-info").innerHTML = "Abierto <b>"+esc(b.nombre)+"</b>. Gu\u00e1rdalo para que aparezca como tu examen.";
+      toast("Balotario abierto en el editor");
+    }}]);
 };
 $("#btn-cargar-bal").onclick = ()=> $("#file-bal").click();
 $("#file-bal").onchange = ev=>{

@@ -77,7 +77,7 @@ La página trae exámenes ya cargados, que aparecen en un desplegable en la pant
 
 | Balotario | Contenido |
 |---|---|
-| **Matemáticas** | 30 preguntas: RM (6), aritmética (6), álgebra (8), geometría (5), trigonometría (5). 60 min |
+| **Matemáticas** | **30 de 45 preguntas.** Cuotas fijas por examen: álgebra 10, RM 6, aritmética 6, geometría 4, trigonometría 4. 60 min |
 | **Letras** | 30 preguntas: RV (7), literatura (5), lenguaje (5), historia (4), comprensión lectora (4), geografía (2), economía, cívica y filosofía. 50 min |
 | **Ciencias** | 30 preguntas: física (10), química (10), biología (10). 60 min |
 | Examen de Admisión — Banco General | **90 preguntas, 30 por examen.** Nivel San Marcos / Callao, todas las materias |
@@ -97,7 +97,22 @@ que tienen en el banco:
 | Aritmética · Geometría · Trigonometría · Física · Química · Biología · Historia del Perú | 6 c/u | 2 c/u |
 | Comprensión Lectora · Geografía · Economía · Lenguaje · Literatura · Educación Cívica | 3 c/u | 1 c/u |
 
-### Rotación
+### Cuotas por materia
+
+Un examen puede fijar cuántas preguntas toma de cada materia, en vez de repartirlas
+en proporción al banco:
+
+```json
+"porExamen": 30,
+"cuotas": { "Álgebra": 10, "Razonamiento Matemático": 6, "Aritmética": 6,
+            "Geometría": 4, "Trigonometría": 4 }
+```
+
+Sirve cuando el banco crece de forma despareja: el de Matemáticas tiene 23 preguntas de
+álgebra y solo 5 de trigonometría, pero el examen sigue saliendo equilibrado. Dentro de
+cada materia la rotación elige las que todavía no han salido.
+
+## Rotación
 
 La página recuerda qué preguntas ya salieron y el siguiente intento toma otras.
 Con 90 preguntas y 30 por examen salen **tres exámenes completos sin repetir ni una**.
@@ -128,6 +143,24 @@ El botón **Vista previa** de cada pregunta muestra cómo queda renderizada ante
 
 > KaTeX se carga desde internet. Si abres la página sin conexión, las fórmulas aparecen
 > como texto plano (`$x^2$`) en lugar de renderizadas. El examen sigue funcionando.
+
+## Resultados por postulante
+
+**Modo docente → Ver resultados** abre el panel de resultados:
+
+- Indicadores: exámenes rendidos, postulantes distintos, promedio, mejor puntaje, aprobados
+- Tabla por intento: postulante, DNI, examen, fecha, puntaje, nota vigesimal, aciertos, tiempo, salidas y estado
+- Filtros por nombre o DNI y por examen
+- Rendimiento acumulado por materia, ordenado de peor a mejor, para ver qué reforzar
+- Exportación a CSV (se abre en Excel) y a JSON
+
+Cada examen enviado se registra automáticamente en el navegador donde se rindió.
+Si el postulante usa otro equipo, al terminar le aparece un **código de resultado**
+(`RES1-...`) que puede enviar por WhatsApp; se pega en el panel con *Pegar código de
+resultado* y el intento se suma a la tabla.
+
+> El historial vive en el `localStorage` del navegador, que ronda los 5 MB.
+> Conviene exportarlo cada cierto tiempo a `resultados\` en Drive y limpiar el historial.
 
 ## Scripts
 

@@ -163,6 +163,9 @@ textarea.in{resize:vertical;line-height:1.55}
 .alt-row input[type=radio]{accent-color:var(--accent);width:18px;height:18px;flex:0 0 auto;cursor:pointer}
 .alt-row .l{width:22px;font-weight:700;color:var(--muted);font-size:13.5px}
 .x{border:0;background:#fdecec;color:var(--red);width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:16px;line-height:1;flex:0 0 auto}
+.img-box{display:flex;gap:12px;align-items:center;margin:4px 0 12px;flex-wrap:wrap}
+.img-box img{height:60px;border-radius:7px;border:1px solid var(--line)}
+.img-box .nom{font-size:12.5px;color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sw{display:flex;align-items:center;gap:9px;font-size:14px;margin-bottom:10px;cursor:pointer}
 .sw input{accent-color:var(--accent);width:17px;height:17px}
 .bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:14px 20px;
@@ -330,6 +333,17 @@ textarea.in{resize:vertical;line-height:1.55}
     </div>
 
     <div class="panel">
+      <h4>Balotario</h4>
+      <p style="font-size:14px;color:#4b6560;line-height:1.7;margin:0 0 14px">
+        Guarda el examen como archivo <b>.json</b> en tu carpeta de balotarios, o carga uno que ya tengas.
+        Las imagenes quedan incrustadas dentro del archivo, asi que no se pierden al moverlo.</p>
+      <button class="btn" id="btn-guardar-bal">Guardar balotario (.json)</button>
+      <button class="btn ghost" id="btn-cargar-bal">Cargar balotario (.json)</button>
+      <input type="file" id="file-bal" accept=".json,application/json" class="hide">
+      <div id="bal-info" style="font-size:13px;color:var(--muted);margin-top:12px"></div>
+    </div>
+
+    <div class="panel">
       <h4>Compartir</h4>
       <p style="font-size:14px;color:#4b6560;line-height:1.7;margin:0 0 14px">
         Genera un código con el examen completo. Quien lo pegue entra directo a rendirlo: no ve el editor ni las respuestas correctas.</p>
@@ -396,7 +410,10 @@ const DEFAULT = {
 /* ---------- Utilidades ---------- */
 function b64enc(obj){ return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replace(/\+/g,"-").replace(/\//g,"_"); }
 function b64dec(s){ try{ return JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g,"+").replace(/_/g,"/"))))); }catch(e){ return null; } }
-function save(cfg){ try{ localStorage.setItem(KEY, JSON.stringify(cfg)); }catch(e){} }
+function save(cfg){
+  try{ localStorage.setItem(KEY, JSON.stringify(cfg)); return true; }
+  catch(e){ toast("No se pudo guardar en el navegador: el examen pesa demasiado. Guardalo como archivo .json."); return false; }
+}
 function load(){ try{ const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; }catch(e){ return null; } }
 function shuffle(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]];} return b; }
 function toast(msg){ const t=el("div","toast",msg); document.body.appendChild(t); setTimeout(()=>t.remove(),2600); }
@@ -436,7 +453,7 @@ let tick = null;
 function normalizar(c){
   const d = Object.assign({}, DEFAULT, c);
   d.preguntas = (c.preguntas||[]).map(q=>({
-    t:q.t||"", p:q.p||"", o:(q.o||[]).slice(), c:(typeof q.c==="number"?q.c:0), e:q.e||"", img:q.img||""
+    t:q.t||"", p:q.p||"", o:(q.o||[]).slice(), c:(typeof q.c==="number"?q.c:0), e:q.e||"", img:q.img||"", imgNom:q.imgNom||""
   }));
   if(!Array.isArray(d.reglas) || !d.reglas.length) d.reglas = DEFAULT.reglas;
   return d;
@@ -730,6 +747,7 @@ function pintarResultados(porTiempo){
     c.innerHTML = '<div class="q-head"><div class="q-num">PREGUNTA '+(i+1)+(q.tema?' · '+esc(q.tema):'')+'</div>'+
       '<span class="tag '+estado[0]+'">'+estado[1]+'</span></div>'+
       '<p class="q-text" style="font-size:16px">'+esc(q.texto)+'</p>'+
+      (q.img?'<img class="q-img" src="'+q.img+'" alt="">':'')+
       q.opts.map((o,j)=>{
         let cls="opt";
         if(j===correcta) cls+=" ok";
@@ -788,6 +806,27 @@ function pintarPreguntasEd(){
     addAlt.onclick=()=>{ if(q.o.length>=6){toast("Máximo 6");return;} q.o.push(""); pintarPreguntasEd(); };
     d.appendChild(addAlt);
 
+    const box=el("div","img-box");
+    const inFile=el("input"); inFile.type="file"; inFile.accept="image/*"; inFile.className="hide";
+    inFile.onchange=ev=>{
+      const f=ev.target.files[0]; if(!f) return;
+      if(f.size > 900*1024){ toast("La imagen pesa "+Math.round(f.size/1024)+" KB. Usa una mas liviana (max. 900 KB)."); ev.target.value=""; return; }
+      const r=new FileReader();
+      r.onload=()=>{ q.img=r.result; q.imgNom=f.name; pintarPreguntasEd(); };
+      r.readAsDataURL(f); ev.target.value="";
+    };
+    const bAdd=el("button","btn ghost sm", q.img ? "Cambiar imagen" : "+ Imagen / figura");
+    bAdd.onclick=()=>inFile.click();
+    box.append(inFile,bAdd);
+    if(q.img){
+      const th=el("img"); th.src=q.img; box.appendChild(th);
+      if(q.imgNom) box.appendChild(el("span","nom",esc(q.imgNom)));
+      const bDel=el("button","btn ghost sm","Quitar");
+      bDel.onclick=()=>{ q.img=""; q.imgNom=""; pintarPreguntasEd(); };
+      box.appendChild(bDel);
+    }
+    d.appendChild(box);
+
     const ex=el("textarea","in"); ex.rows=2; ex.placeholder="Explicación de la respuesta (opcional, se muestra al corregir)"; ex.value=q.e;
     ex.oninput=e=>q.e=e.target.value; d.appendChild(ex);
     L.appendChild(d);
@@ -800,7 +839,7 @@ $("#ed-antifraude").addEventListener("change", e=>{
   $("#ed-af-cfg").style.opacity = e.target.checked ? "1" : ".45";
 });
 
-$("#btn-add-q").onclick = ()=>{ CFG.preguntas.push({t:"",p:"",o:["","","",""],c:0,e:"",img:""}); pintarPreguntasEd();
+$("#btn-add-q").onclick = ()=>{ CFG.preguntas.push({t:"",p:"",o:["","","",""],c:0,e:"",img:"",imgNom:""}); pintarPreguntasEd();
   window.scrollTo(0,document.body.scrollHeight); };
 
 $("#btn-add-lote").onclick = ()=>{
@@ -821,7 +860,7 @@ $("#btn-add-lote").onclick = ()=>{
         const p=ls[0].replace(/^\d+[\.\)]\s*/,"");
         const opts=ls.slice(1), o=[]; let c=0;
         opts.forEach((x,i)=>{ const m=x.startsWith("*"); if(m)c=i; o.push(x.replace(/^\*/,"").replace(/^[a-eA-E][\.\)]\s*/,"").trim()); });
-        CFG.preguntas.push({t:"",p,o,c,e:"",img:""}); n++;
+        CFG.preguntas.push({t:"",p,o,c,e:"",img:"",imgNom:""}); n++;
       });
       $("#modal-root").innerHTML=""; pintarPreguntasEd(); toast(n+" pregunta(s) agregada(s)");
     };
@@ -878,6 +917,42 @@ function pedirCodigo(despues){
     };
   },0);
 }
+function nombreArchivo(){
+  return (CFG.titulo||"balotario").normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .replace(/[^\w\s-]/g,"").trim().replace(/\s+/g,"-").toLowerCase() + ".json";
+}
+
+$("#btn-guardar-bal").onclick = ()=>{
+  leerEditor(); save(CFG);
+  if(!CFG.preguntas.length){ toast("Agrega preguntas primero"); return; }
+  const txt = JSON.stringify(CFG,null,2);
+  const nom = nombreArchivo();
+  try{
+    const a=el("a"); a.href=URL.createObjectURL(new Blob([txt],{type:"application/json"}));
+    a.download=nom; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },4000);
+    $("#bal-info").innerHTML = "Guardado como <b>"+nom+"</b> ("+Math.round(txt.length/1024)+" KB). "+
+      "Muévelo a tu carpeta de balotarios. Si no se descargó, estás en la vista previa de Claude: "+
+      "abre la página publicada o usa el código del examen.";
+  }catch(e){ $("#bal-info").textContent = "Este visor no permite descargas. Usa el código del examen."; }
+};
+$("#btn-cargar-bal").onclick = ()=> $("#file-bal").click();
+$("#file-bal").onchange = ev=>{
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const c=JSON.parse(r.result);
+      if(!c.preguntas || !c.preguntas.length) throw new Error("sin preguntas");
+      CFG=normalizar(c); save(CFG);
+      cargarEditor(); pintarAcceso();
+      $("#bal-info").innerHTML = "Cargado <b>"+esc(f.name)+"</b> — "+CFG.preguntas.length+" pregunta(s).";
+      toast("Balotario cargado: "+CFG.titulo);
+    }catch(err){ $("#bal-info").textContent="Ese archivo no es un balotario válido."; }
+  };
+  r.readAsText(f); ev.target.value="";
+};
+
 $("#btn-cargar-cod").onclick = ()=> pedirCodigo(()=>cargarEditor());
 $("#lnk-codigo").onclick = ()=> pedirCodigo(null);
 })();

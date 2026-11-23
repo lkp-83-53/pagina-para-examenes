@@ -9,7 +9,9 @@ Plataforma de una sola página (HTML puro, sin dependencias) para **crear exáme
 - Editor de preguntas: enunciado, tema/curso, de 2 a 6 alternativas, marca de la correcta y explicación
 - Carga masiva: pegar varias preguntas de golpe (la correcta se marca con `*`)
 - Reordenar, duplicar y eliminar preguntas
-- Opciones: mezclar preguntas, mezclar alternativas, ocultar resultados, avisar si el postulante cambia de pestaña
+- Imagen o figura por pregunta, incrustada en el balotario
+- Guardar y cargar balotarios como archivos `.json`
+- Opciones: mezclar preguntas, mezclar alternativas, ocultar resultados
 
 **Modo postulante**
 - Acceso con nombre y DNI + aceptación de reglas de ética
@@ -20,12 +22,49 @@ Plataforma de una sola página (HTML puro, sin dependencias) para **crear exáme
 - Confirmación antes de enviar, con el conteo de pendientes
 - Resultados: puntaje, nota vigesimal, aprobado/desaprobado y revisión pregunta por pregunta con la explicación
 
+**Vigilancia durante el examen**
+- Registra cada salida de la página (cambio de pestaña o minimizar), con duración y hora
+- Advertencia bloqueante en cada salida, indicando cuántas le quedan
+- Descalificación automática a la tercera salida o al superar 1 minuto fuera
+- Ambos límites configurables; la bitácora de salidas aparece en el reporte final
+
 ## Cómo se comparte un examen
 
 En el modo docente, **Generar código del examen** produce un texto que empieza con `EXAM1-`.
 Quien lo recibe abre la misma página, toca **"Tengo un código de examen"**, lo pega y rinde.
 
 El examen en edición se guarda en el `localStorage` del navegador donde se creó. El código es lo que viaja.
+
+## Dónde vive cada cosa
+
+| Qué | Dónde |
+|---|---|
+| Código de la página | `C:\Users\nvill\pagina-para-examen` y este repositorio |
+| Balotarios (`.json`) e imágenes | `G:\Mi unidad\APPS PARA CONTROL DE GASTOS\pagina_para_examenes` |
+| Publicado en | https://lkp-83-53.github.io/pagina-para-examenes/ |
+
+El repositorio guarda **solo el código**. Los balotarios no se versionan aquí a propósito:
+contienen las respuestas correctas y el repositorio es público.
+
+## Formato del balotario
+
+```json
+{
+  "titulo": "Simulacro de Admisión 01",
+  "duracion": 60,
+  "notaMin": 60,
+  "maxSalidas": 3,
+  "maxSegFuera": 60,
+  "preguntas": [
+    { "t": "Álgebra", "p": "Resuelve: 2x + 7 = 3x - 5",
+      "o": ["x = -12", "x = 2", "x = 12", "x = 6"], "c": 2,
+      "e": "7 + 5 = 3x - 2x, entonces x = 12.", "img": "" }
+  ]
+}
+```
+
+`c` es el índice de la alternativa correcta empezando en 0. `img` guarda la figura
+incrustada como data URL, o queda vacío.
 
 ## Publicación
 

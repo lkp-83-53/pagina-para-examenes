@@ -71,6 +71,27 @@ incrustada como data URL, o queda vacío.
 Es un único archivo `index.html` sin build ni dependencias: funciona abriéndolo directo
 o publicado en GitHub Pages.
 
+## Fórmulas en LaTeX
+
+La página renderiza matemática con [KaTeX](https://katex.org), cargado desde jsDelivr.
+Funciona en el enunciado, las alternativas y la explicación.
+
+| Escribes | Resultado |
+|---|---|
+| `$x^2 + 3x - 10 = 0$` | fórmula dentro de la línea de texto |
+| `$$\int_0^1 x\,dx = \frac{1}{2}$$` | fórmula centrada en su propio renglón |
+| `\frac{a}{b}` `\sqrt{x}` `x_{1}` `x^{2}` | fracción, raíz, subíndice, exponente |
+| `\sen` `\cos` `\tan` `\tg` `\ctg` `\cosec` | funciones trigonométricas en notación hispana |
+| `\R` `\N` `\Z` `\Q` | conjuntos numéricos |
+
+`\sen`, `\tg`, `\ctg` y `\cosec` no existen en KaTeX estándar: están definidos como macros
+en la página, porque son la notación que se usa en los exámenes peruanos.
+
+El botón **Vista previa** de cada pregunta muestra cómo queda renderizada antes de guardarla.
+
+> KaTeX se carga desde internet. Si abres la página sin conexión, las fórmulas aparecen
+> como texto plano (`$x^2$`) en lugar de renderizadas. El examen sigue funcionando.
+
 ## Scripts
 
 En `scripts\` hay la misma utilidad en dos sabores: `.ps1` para PowerShell y `.sh` para Git Bash.

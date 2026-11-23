@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Examen de Admisión</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"></script>
 <style>
 :root{
   --dark:#163a30; --dark2:#0f2a23; --accent:#1ea85c; --accent-d:#17894b;
@@ -78,6 +81,9 @@ button{font-family:inherit}
 .q-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
 .q-num{font-size:12.5px;font-weight:800;color:var(--accent-d);letter-spacing:1.6px}
 .q-text{font-size:17.5px;line-height:1.65;margin:0 0 22px;white-space:pre-wrap}
+.katex{font-size:1.06em}
+.katex-display{margin:14px 0;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+.opt .txt .katex{font-size:1.02em}
 .q-img{max-width:100%;border-radius:10px;margin:0 0 20px;display:block}
 .opt{display:flex;gap:13px;align-items:flex-start;border:1.5px solid var(--line);border-radius:11px;
   padding:14px 16px;margin-bottom:11px;cursor:pointer;transition:.13s;background:#fff}
@@ -327,6 +333,11 @@ textarea.in{resize:vertical;line-height:1.55}
 
     <div class="panel">
       <h4>Preguntas (<span id="ed-count">0</span>)</h4>
+      <div style="background:#f6faf8;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 15px;margin-bottom:18px;font-size:13.5px;line-height:1.7;color:#3d5852">
+        <b>Fórmulas en LaTeX.</b> Escribe matemática entre signos de dólar: <code>$x^2+3x-10=0$</code> queda en la línea,
+        y <code>$$\int_0^1 x\,dx$$</code> queda centrada en su propio renglón. Funciona en el enunciado,
+        en las alternativas y en la explicación. Usa <b>Vista previa</b> para comprobar cómo se ve.
+      </div>
       <div id="ed-lista"></div>
       <button class="btn ghost" id="btn-add-q">+ Agregar pregunta</button>
       <button class="btn ghost" id="btn-add-lote">Pegar varias de golpe</button>
@@ -394,6 +405,11 @@ const DEFAULT = {
     {t:"Comprensión Lectora", p:"\"La minería formal aporta divisas y empleo, pero exige estándares ambientales estrictos para ser sostenible.\"\n\nEl texto sostiene principalmente que la minería formal:",
      o:["Debe prohibirse por contaminar","Solo genera empleo temporal","Es beneficiosa si cumple estándares ambientales","No tiene relación con las divisas"], c:2,
      e:"La idea central condiciona el beneficio de la minería al cumplimiento de estándares ambientales."},
+    {t:"Álgebra", p:"Al resolver la ecuación $x^2 - 7x + 12 = 0$, la suma de sus raíces es:",
+     o:["$5$","$7$","$12$","$-7$"], c:1, e:"Por Cardano-Vieta, la suma de raíces es $-b/a = 7$. Las raíces son $3$ y $4$."},
+    {t:"Trigonometría", p:"Calcula el valor de la expresión:\n$$E = \\frac{\\sen^2 30^\\circ + \\cos^2 30^\\circ}{\\tan 45^\\circ}$$",
+     o:["$0$","$1$","$2$","$\\frac{1}{2}$"], c:1,
+     e:"Por la identidad pitagórica $\\sen^2\\theta + \\cos^2\\theta = 1$, y como $\\tan 45^\\circ = 1$, entonces $E = 1$."},
     {t:"Cultura General", p:"¿Cuál es el organismo del Estado peruano encargado del sector minero y energético?",
      o:["MINAM","MINEM","OSINERGMIN","INGEMMET"], c:1, e:"El Ministerio de Energía y Minas (MINEM) rige el sector."}
   ],
@@ -428,6 +444,34 @@ function modal(titulo, cuerpo, acciones){
   acciones.forEach(a=>{ const b=el("button","btn "+(a.cls||"ghost"),a.txt); b.onclick=()=>{ root.innerHTML=""; a.fn&&a.fn(); }; acts.appendChild(b); });
   box.appendChild(acts); m.appendChild(box); root.innerHTML=""; root.appendChild(m);
 }
+const DELIMS = [
+  {left:"$$", right:"$$", display:true},
+  {left:"\\[", right:"\\]", display:true},
+  {left:"$",  right:"$",  display:false},
+  {left:"\\(", right:"\\)", display:false}
+];
+function mat(nodo){
+  if(!nodo || typeof window.renderMathInElement !== "function") return;
+  try{
+    window.renderMathInElement(nodo, {
+      delimiters: DELIMS,
+      macros: {
+        "\\sen": "\\operatorname{sen}",
+        "\\tg": "\\operatorname{tg}",
+        "\\ctg": "\\operatorname{ctg}",
+        "\\cosec": "\\operatorname{cosec}",
+        "\\R": "\\mathbb{R}",
+        "\\N": "\\mathbb{N}",
+        "\\Z": "\\mathbb{Z}",
+        "\\Q": "\\mathbb{Q}"
+      },
+      throwOnError: false,
+      errorColor: "#dc2626",
+      ignoredTags: ["script","noscript","style","textarea","pre","code","option","input","button"]
+    });
+  }catch(e){}
+}
+
 function show(id){ ["view-acceso","view-reglas","view-examen","view-res","view-editor"].forEach(v=>$("#"+v).classList.toggle("hide", v!==id)); window.scrollTo(0,0); }
 
 /* ---------- Estado ---------- */
@@ -499,6 +543,7 @@ function pintarReglas(){
     + (CFG.antifraude ? '<div style="margin-top:16px;padding:14px 16px;border-radius:10px;background:#fff7ed;border-left:3px solid var(--amber);color:#9a6a08">'+
        '<b>Vigilancia activa.</b> Si cambias de pestaña o minimizas la ventana, queda registrado. '+
        'A la salida n.º '+CFG.maxSalidas+', o si permaneces más de '+CFG.maxSegFuera+' segundos fuera, tu examen se anula automáticamente.</div>' : "");
+  mat($("#rg-reglas"));
 }
 
 /* ---------- Motor del examen ---------- */
@@ -577,6 +622,7 @@ function pintarPregunta(){
     d.onclick=()=>{ S.resp[i]=j; pintarPregunta(); };
     cont.appendChild(d);
   });
+  mat(document.querySelector(".q-card"));
   $("#chk-marcar").checked = S.flags[i];
   $("#ex-contador").textContent = (i+1)+" / "+S.qs.length;
   $("#ex-progress").style.width = (S.resp.filter(r=>r!==null).length/S.qs.length*100)+"%";
@@ -759,6 +805,7 @@ function pintarResultados(porTiempo){
       (q.expl?'<div class="expl"><b>Explicación:</b> '+esc(q.expl)+'</div>':'');
     rev.appendChild(c);
   });
+  mat(rev);
 }
 $("#btn-imprimir").onclick = ()=>window.print();
 $("#btn-reiniciar").onclick = ()=>{ show("view-acceso"); $("#in-acepto").checked=false; };
@@ -782,7 +829,7 @@ function pintarPreguntasEd(){
     const head=el("div","qe-head");
     head.innerHTML='<b>PREGUNTA '+(i+1)+'</b>';
     const tools=el("div");
-    [["↑",()=>mover(i,-1)],["↓",()=>mover(i,1)],["Duplicar",()=>{CFG.preguntas.splice(i+1,0,JSON.parse(JSON.stringify(q)));pintarPreguntasEd();}],["Eliminar",()=>{CFG.preguntas.splice(i,1);pintarPreguntasEd();}]]
+    [["Vista previa",()=>vistaPrevia(q,i)],["↑",()=>mover(i,-1)],["↓",()=>mover(i,1)],["Duplicar",()=>{CFG.preguntas.splice(i+1,0,JSON.parse(JSON.stringify(q)));pintarPreguntasEd();}],["Eliminar",()=>{CFG.preguntas.splice(i,1);pintarPreguntasEd();}]]
       .forEach(([t,fn])=>{ const b=el("button","btn ghost sm",t); b.style.marginLeft="6px"; b.onclick=fn; tools.appendChild(b); });
     head.appendChild(tools); d.appendChild(head);
 
@@ -832,6 +879,23 @@ function pintarPreguntasEd(){
     L.appendChild(d);
   });
 }
+function vistaPrevia(q,i){
+  const cuerpo =
+    '<div style="font-size:12px;font-weight:800;letter-spacing:1.4px;color:var(--accent-d);margin-bottom:10px">'+
+      'PREGUNTA '+(i+1)+(q.t?' · '+esc(q.t):'')+'</div>'+
+    '<div class="q-text" id="vp-txt" style="font-size:16px">'+esc(q.p||"(sin enunciado)")+'</div>'+
+    (q.img?'<img class="q-img" src="'+q.img+'" alt="">':'')+
+    q.o.map((o,j)=>'<div class="opt'+(q.c===j?' ok':'')+'" style="cursor:default">'+
+      '<div class="letra">'+LETRAS[j]+'</div><div class="txt">'+esc(o||"(vacía)")+
+      (q.c===j?' <b style="color:var(--accent-d)">✓</b>':'')+'</div></div>').join('')+
+    (q.e?'<div class="expl"><b>Explicación:</b> '+esc(q.e)+'</div>':'');
+  modal("Vista previa", cuerpo, [{txt:"Cerrar",cls:""}]);
+  setTimeout(()=>{
+    const b=document.querySelector(".modal-box");
+    if(b){ b.style.maxWidth="700px"; mat(b); }
+  },0);
+}
+
 function mover(i,dir){ const j=i+dir; if(j<0||j>=CFG.preguntas.length) return;
   const t=CFG.preguntas[i]; CFG.preguntas[i]=CFG.preguntas[j]; CFG.preguntas[j]=t; pintarPreguntasEd(); }
 

@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Examen de Admisión</title>
+<style>
+:root{
+  --dark:#163a30; --dark2:#0f2a23; --accent:#1ea85c; --accent-d:#17894b;
+  --lime:#7ac143; --ink:#102a23; --muted:#6b7f78; --line:#e2eae7;
+  --bg:#f3f6f5; --card:#fff; --red:#dc2626; --amber:#f59e0b; --violet:#7c3aed;
+  --r:14px; --sh:0 10px 30px rgba(14,42,34,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+.hide{display:none !important}
+
+/* ---------- Botones ---------- */
+.btn{border:0;border-radius:10px;padding:12px 22px;font-size:15px;font-weight:600;cursor:pointer;
+  background:var(--accent);color:#fff;transition:.15s;letter-spacing:.2px}
+.btn:hover{background:var(--accent-d)}
+.btn:disabled{background:#c3d2cc;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.ghost:hover{background:#eef3f1}
+.btn.dark{background:var(--dark)}.btn.dark:hover{background:var(--dark2)}
+.btn.red{background:var(--red)}.btn.red:hover{background:#b91c1c}
+.btn.sm{padding:8px 14px;font-size:13.5px;border-radius:8px}
+.btn.block{width:100%}
+
+/* ---------- Portada / acceso ---------- */
+#view-acceso{min-height:100vh;background:var(--dark);position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;padding:32px}
+.blob{position:absolute;border-radius:50%;filter:blur(.2px);opacity:.95}
+.b1{width:420px;height:420px;background:var(--lime);top:-190px;right:-90px}
+.b2{width:300px;height:300px;background:var(--accent);top:-60px;right:120px;opacity:.55}
+.b3{width:360px;height:360px;background:var(--accent);bottom:-200px;left:-120px;opacity:.35}
+.acceso-wrap{position:relative;z-index:2;display:flex;gap:60px;align-items:center;
+  max-width:1050px;width:100%;flex-wrap:wrap;justify-content:center}
+.acceso-left{flex:1 1 360px;color:#fff;max-width:440px}
+.kicker{color:var(--lime);font-size:12.5px;letter-spacing:2.6px;font-weight:700;margin-bottom:14px}
+.acceso-left h1{font-size:30px;line-height:1.35;font-weight:400;margin:0 0 18px}
+.acceso-left p{color:#b9cfc7;font-size:14.5px;line-height:1.7;margin:0}
+.card-login{flex:0 0 370px;background:#fff;border-radius:18px;padding:30px 28px;box-shadow:0 24px 60px rgba(0,0,0,.28)}
+.logo{width:64px;height:64px;border-radius:14px;background:var(--dark);color:#fff;display:flex;
+  align-items:center;justify-content:center;font-weight:800;font-size:13px;margin:0 auto 16px;text-align:center;line-height:1.1;padding:6px}
+.card-login h2{font-size:16.5px;color:var(--accent-d);text-align:center;margin:0 0 22px;line-height:1.45;font-weight:700}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;font-weight:600}
+.field input{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 13px;font-size:14.5px;outline:0;background:#fafcfb}
+.field input:focus{border-color:var(--accent)}
+.check{display:flex;gap:9px;align-items:flex-start;margin:16px 0 6px;font-size:13px;color:#415b53;line-height:1.5}
+.check input{margin-top:2px;width:16px;height:16px;accent-color:var(--accent);flex:0 0 auto}
+.check a{color:var(--accent-d);cursor:pointer;text-decoration:underline}
+.err{color:var(--red);font-size:12.5px;min-height:16px;margin:4px 0 10px}
+.pie{text-align:center;font-size:11px;color:#9fb0aa;margin-top:18px;line-height:1.6}
+
+/* ---------- Barra superior examen ---------- */
+.top{position:sticky;top:0;z-index:30;background:var(--dark);color:#fff;
+  display:flex;align-items:center;gap:18px;padding:12px 22px;flex-wrap:wrap}
+.top .t-title{font-weight:600;font-size:15px;flex:1 1 220px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pill{background:rgba(255,255,255,.12);border-radius:999px;padding:7px 15px;font-size:13.5px;font-weight:600;display:flex;gap:8px;align-items:center}
+.timer{font-variant-numeric:tabular-nums;font-size:16px;letter-spacing:.5px}
+.pill.warn{background:rgba(245,158,11,.25);color:#ffd79a}
+.pill.danger{background:rgba(220,38,38,.3);color:#ffc9c9;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.6}}
+.progress{height:4px;background:rgba(255,255,255,.15);width:100%}
+.progress>div{height:100%;background:var(--lime);width:0;transition:width .25s}
+
+/* ---------- Layout examen ---------- */
+.exam{max-width:1140px;margin:0 auto;padding:26px 20px 60px;display:grid;
+  grid-template-columns:1fr 268px;gap:24px;align-items:start}
+.q-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:28px 30px}
+.q-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.q-num{font-size:12.5px;font-weight:800;color:var(--accent-d);letter-spacing:1.6px}
+.q-text{font-size:17.5px;line-height:1.65;margin:0 0 22px;white-space:pre-wrap}
+.q-img{max-width:100%;border-radius:10px;margin:0 0 20px;display:block}
+.opt{display:flex;gap:13px;align-items:flex-start;border:1.5px solid var(--line);border-radius:11px;
+  padding:14px 16px;margin-bottom:11px;cursor:pointer;transition:.13s;background:#fff}
+.opt:hover{border-color:#b9d8c8;background:#f7fbf9}
+.opt.sel{border-color:var(--accent);background:#edf9f2;box-shadow:0 0 0 3px rgba(30,168,92,.12)}
+.opt .letra{flex:0 0 28px;height:28px;border-radius:50%;border:1.5px solid var(--line);display:flex;
+  align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--muted);background:#fff}
+.opt.sel .letra{background:var(--accent);border-color:var(--accent);color:#fff}
+.opt .txt{flex:1;font-size:15.5px;line-height:1.55;padding-top:3px}
+.opt.ok{border-color:var(--accent);background:#edf9f2}
+.opt.bad{border-color:var(--red);background:#fef2f2}
+.opt.ok .letra{background:var(--accent);border-color:var(--accent);color:#fff}
+.opt.bad .letra{background:var(--red);border-color:var(--red);color:#fff}
+.q-foot{display:flex;justify-content:space-between;gap:12px;margin-top:24px;padding-top:20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.mark{display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);cursor:pointer;user-select:none}
+.mark input{accent-color:var(--violet);width:15px;height:15px}
+
+/* ---------- Panel lateral ---------- */
+.side{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:20px;position:sticky;top:78px}
+.side h3{margin:0 0 14px;font-size:13px;letter-spacing:1.4px;color:var(--muted);text-transform:uppercase}
+.grid-n{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.gn{aspect-ratio:1;border:1.5px solid var(--line);background:#fff;border-radius:8px;font-size:13.5px;
+  font-weight:700;color:#55706a;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:.12s}
+.gn:hover{border-color:var(--accent)}
+.gn.ans{background:var(--accent);border-color:var(--accent);color:#fff}
+.gn.seen{border-color:var(--amber);color:var(--amber)}
+.gn.cur{box-shadow:0 0 0 3px rgba(30,168,92,.3);border-color:var(--accent)}
+.gn.flag::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:var(--violet)}
+.leyenda{margin-top:16px;font-size:12px;color:var(--muted);line-height:2}
+.dot{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px;border:1.5px solid var(--line)}
+.dot.a{background:var(--accent);border-color:var(--accent)}
+.dot.s{border-color:var(--amber)}
+.dot.f{background:var(--violet);border-color:var(--violet);border-radius:50%}
+.side .btn{margin-top:18px}
+
+/* ---------- Modal ---------- */
+.modal{position:fixed;inset:0;background:rgba(10,30,24,.55);display:flex;align-items:center;
+  justify-content:center;padding:20px;z-index:80;backdrop-filter:blur(2px)}
+.modal-box{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:28px;box-shadow:0 30px 70px rgba(0,0,0,.3)}
+.modal-box h3{margin:0 0 12px;font-size:19px}
+.modal-box p{color:#4b6560;font-size:14.5px;line-height:1.65;margin:0 0 20px}
+.modal-acts{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.resumen{background:#f6faf8;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:14px;line-height:1.9}
+.resumen b{float:right}
+
+/* ---------- Resultados ---------- */
+.res-wrap{max-width:880px;margin:0 auto;padding:34px 20px 70px}
+.res-hero{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:36px;text-align:center;margin-bottom:22px}
+.score-ring{width:150px;height:150px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;background:conic-gradient(var(--accent) 0deg,#e9efec 0deg)}
+.score-in{width:120px;height:120px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-in b{font-size:33px;line-height:1}
+.score-in span{font-size:11.5px;color:var(--muted);letter-spacing:1px;margin-top:3px}
+.estado{display:inline-block;padding:7px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:6px}
+.estado.ok{background:#e7f8ee;color:var(--accent-d)}
+.estado.no{background:#fdecec;color:var(--red)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:26px}
+.stat{background:#f6faf8;border-radius:10px;padding:14px}
+.stat b{display:block;font-size:22px}
+.stat span{font-size:12px;color:var(--muted)}
+.rev{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:22px 26px;margin-bottom:14px}
+.rev .tag{font-size:11.5px;font-weight:800;letter-spacing:1.2px;padding:4px 10px;border-radius:6px}
+.tag.ok{background:#e7f8ee;color:var(--accent-d)}
+.tag.no{background:#fdecec;color:var(--red)}
+.tag.vacia{background:#f1f5f4;color:var(--muted)}
+.expl{background:#f6faf8;border-left:3px solid var(--accent);padding:12px 15px;border-radius:0 8px 8px 0;font-size:14px;line-height:1.6;color:#3d5852;margin-top:12px}
+
+/* ---------- Editor ---------- */
+.ed{max-width:960px;margin:0 auto;padding:28px 20px 70px}
+.ed h2{margin:0 0 6px;font-size:23px}
+.ed .sub{color:var(--muted);font-size:14px;margin:0 0 24px;line-height:1.6}
+.panel{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:24px;margin-bottom:18px}
+.panel h4{margin:0 0 16px;font-size:14px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.in{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14.5px;outline:0;font-family:inherit;background:#fafcfb}
+.in:focus{border-color:var(--accent)}
+textarea.in{resize:vertical;line-height:1.55}
+.lab{display:block;font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.q-edit{border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px;background:#fcfefd}
+.q-edit .qe-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.q-edit .qe-head b{font-size:13px;color:var(--accent-d);letter-spacing:1.2px}
+.alt-row{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.alt-row input[type=radio]{accent-color:var(--accent);width:18px;height:18px;flex:0 0 auto;cursor:pointer}
+.alt-row .l{width:22px;font-weight:700;color:var(--muted);font-size:13.5px}
+.x{border:0;background:#fdecec;color:var(--red);width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:16px;line-height:1;flex:0 0 auto}
+.sw{display:flex;align-items:center;gap:9px;font-size:14px;margin-bottom:10px;cursor:pointer}
+.sw input{accent-color:var(--accent);width:17px;height:17px}
+.bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:14px 20px;
+  display:flex;gap:10px;justify-content:center;flex-wrap:wrap;box-shadow:0 -6px 20px rgba(0,0,0,.05);z-index:40}
+.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;
+  padding:12px 22px;border-radius:999px;font-size:14px;z-index:90;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.link{color:var(--accent-d);cursor:pointer;text-decoration:underline;font-size:13.5px;background:0;border:0;padding:0;font-family:inherit}
+
+@media(max-width:860px){
+  .exam{grid-template-columns:1fr}
+  .side{position:static;order:-1}
+  .grid-n{grid-template-columns:repeat(8,1fr)}
+  .acceso-wrap{gap:28px}
+  .card-login{flex:1 1 320px}
+  .q-card{padding:22px 18px}
+}
+@media print{.top,.side,.bar,.q-foot{display:none}}
+</style>
+</head>
+<body>
+
+<!-- ============ ACCESO ============ -->
+<div id="view-acceso">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="acceso-wrap">
+    <div class="acceso-left">
+      <div class="kicker" id="ac-kicker">EXAMEN DE ADMISIÓN</div>
+      <h1 id="ac-titulo">Examen de Admisión</h1>
+      <p id="ac-desc">Ingresa tus datos para iniciar la evaluación.</p>
+    </div>
+    <div class="card-login">
+      <div class="logo" id="ac-logo">EXAMEN</div>
+      <h2 id="ac-sub">Examen de Admisión</h2>
+      <div class="field"><label>Nombre del postulante</label><input id="in-nombre" placeholder="Nombres y apellidos" autocomplete="off"></div>
+      <div class="field"><label>DNI / Código</label><input id="in-dni" placeholder="Ej. 71234567" autocomplete="off"></div>
+      <label class="check"><input type="checkbox" id="in-acepto">
+        <span>He leído y acepto las <a id="lnk-reglas">reglas de ética del postulante</a>.</span></label>
+      <div class="err" id="ac-err"></div>
+      <button class="btn block" id="btn-ingresar">Ingresar</button>
+      <div class="pie">
+        <span id="ac-meta"></span><br>
+        <button class="link" id="lnk-codigo" style="margin-top:8px">Tengo un código de examen</button><br>
+        <button class="link" id="lnk-editor" style="margin-top:8px">Modo docente · crear examen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ INSTRUCCIONES ============ -->
+<div id="view-reglas" class="hide">
+  <div class="top"><div class="t-title" id="rg-titulo"></div></div>
+  <div class="res-wrap">
+    <div class="panel">
+      <h4>Antes de empezar</h4>
+      <div class="resumen" id="rg-resumen"></div>
+      <div id="rg-reglas" style="font-size:14.5px;line-height:1.9;color:#3d5852"></div>
+      <div style="display:flex;gap:10px;margin-top:22px;flex-wrap:wrap">
+        <button class="btn" id="btn-empezar">Comenzar examen</button>
+        <button class="btn ghost" id="btn-volver-acceso">Volver</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EXAMEN ============ -->
+<div id="view-examen" class="hide">
+  <div class="top">
+    <div class="t-title" id="ex-titulo"></div>
+    <div class="pill" id="ex-postulante"></div>
+    <div class="pill" id="ex-contador">0 / 0</div>
+    <div class="pill timer" id="ex-timer">--:--</div>
+    <div class="pill hide" id="ex-avisos">Salidas 0/3</div>
+  </div>
+  <div class="progress"><div id="ex-progress"></div></div>
+  <div class="exam">
+    <div>
+      <div class="q-card">
+        <div class="q-head">
+          <div class="q-num" id="q-num">PREGUNTA 1</div>
+          <div class="q-num" id="q-tema" style="color:var(--muted)"></div>
+        </div>
+        <p class="q-text" id="q-text"></p>
+        <img class="q-img hide" id="q-img" alt="">
+        <div id="q-opts"></div>
+        <div class="q-foot">
+          <label class="mark"><input type="checkbox" id="chk-marcar"> Marcar para revisar</label>
+          <div style="display:flex;gap:10px">
+            <button class="btn ghost sm" id="btn-limpiar">Borrar respuesta</button>
+            <button class="btn ghost" id="btn-prev">Anterior</button>
+            <button class="btn" id="btn-next">Siguiente</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="side">
+      <h3>Navegación</h3>
+      <div class="grid-n" id="grid-n"></div>
+      <div class="leyenda">
+        <div><span class="dot a"></span>Respondida</div>
+        <div><span class="dot s"></span>Vista sin responder</div>
+        <div><span class="dot f"></span>Marcada para revisar</div>
+      </div>
+      <button class="btn dark block" id="btn-finalizar">Finalizar examen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ RESULTADOS ============ -->
+<div id="view-res" class="hide">
+  <div class="top"><div class="t-title" id="rs-titulo"></div>
+    <button class="btn sm ghost" style="color:#fff;border-color:rgba(255,255,255,.3)" id="btn-imprimir">Imprimir</button>
+    <button class="btn sm" id="btn-reiniciar">Nuevo intento</button>
+  </div>
+  <div class="res-wrap">
+    <div class="res-hero">
+      <div class="score-ring" id="rs-ring"><div class="score-in"><b id="rs-nota">0</b><span id="rs-escala">PUNTOS</span></div></div>
+      <div id="rs-estado"></div>
+      <h2 style="margin:14px 0 2px;font-size:20px" id="rs-nombre"></h2>
+      <div style="color:var(--muted);font-size:13.5px" id="rs-fecha"></div>
+      <div class="stats" id="rs-stats"></div>
+    </div>
+    <div id="rs-revision"></div>
+  </div>
+</div>
+
+<!-- ============ EDITOR ============ -->
+<div id="view-editor" class="hide">
+  <div class="top"><div class="t-title">Modo docente — creador de exámenes</div>
+    <button class="btn sm ghost" style="color:#fff;border-color:rgba(255,255,255,.3)" id="btn-salir-editor">Ver como postulante</button>
+  </div>
+  <div class="ed">
+    <h2>Crea el examen</h2>
+    <p class="sub">Configura, escribe las preguntas y genera un enlace para enviárselo a quien va a rendir. Todo queda guardado en este navegador.</p>
+
+    <div class="panel">
+      <h4>Datos del examen</h4>
+      <div class="row">
+        <div><label class="lab">Título</label><input class="in" id="ed-titulo"></div>
+        <div><label class="lab">Subtítulo / institución</label><input class="in" id="ed-sub"></div>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <div><label class="lab">Duración (minutos)</label><input class="in" id="ed-dur" type="number" min="1"></div>
+        <div><label class="lab">Nota mínima aprobatoria (%)</label><input class="in" id="ed-min" type="number" min="0" max="100"></div>
+        <div><label class="lab">Sigla del logo</label><input class="in" id="ed-logo" maxlength="10"></div>
+      </div>
+      <div style="margin-top:16px">
+        <label class="sw"><input type="checkbox" id="ed-aleatorio"> Mezclar el orden de las preguntas</label>
+        <label class="sw"><input type="checkbox" id="ed-mezclaralt"> Mezclar el orden de las alternativas</label>
+        <label class="sw"><input type="checkbox" id="ed-resultados"> Mostrar resultados y respuestas al terminar</label>
+        <label class="sw"><input type="checkbox" id="ed-antifraude"> Vigilar que no salga de la página durante el examen</label>
+        <div id="ed-af-cfg" class="row" style="margin:10px 0 0 26px;max-width:520px">
+          <div><label class="lab">Salidas permitidas antes de descalificar</label>
+            <input class="in" id="ed-maxsal" type="number" min="1" max="10"></div>
+          <div><label class="lab">Segundos fuera que descalifican de inmediato</label>
+            <input class="in" id="ed-maxseg" type="number" min="5" max="600"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h4>Preguntas (<span id="ed-count">0</span>)</h4>
+      <div id="ed-lista"></div>
+      <button class="btn ghost" id="btn-add-q">+ Agregar pregunta</button>
+      <button class="btn ghost" id="btn-add-lote">Pegar varias de golpe</button>
+    </div>
+
+    <div class="panel">
+      <h4>Compartir</h4>
+      <p style="font-size:14px;color:#4b6560;line-height:1.7;margin:0 0 14px">
+        Genera un código con el examen completo. Quien lo pegue entra directo a rendirlo: no ve el editor ni las respuestas correctas.</p>
+      <button class="btn" id="btn-codigo">Generar código del examen</button>
+      <button class="btn ghost" id="btn-cargar-cod">Cargar desde un código</button>
+      <textarea class="in hide" id="out-link" rows="4" style="margin-top:14px;font-size:12px" readonly></textarea>
+      <div class="hide" id="cod-help" style="font-size:13px;color:var(--muted);margin-top:10px;line-height:1.7">
+        Copia ese código y envíaselo a quien rinde el examen (WhatsApp, correo, etc.).
+        Esa persona abre esta misma página, toca <b>"Tengo un código de examen"</b> y lo pega.
+      </div>
+    </div>
+  </div>
+  <div class="bar">
+    <button class="btn dark" id="btn-guardar">Guardar</button>
+    <button class="btn" id="btn-probar">Probar examen</button>
+  </div>
+</div>
+
+<div id="modal-root"></div>
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const el = (t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!==undefined)e.innerHTML=h; return e;};
+const LETRAS = ["A","B","C","D","E","F"];
+const KEY = "examen_admision_cfg_v1";
+
+/* ---------- Config por defecto ---------- */
+const DEFAULT = {
+  titulo:"Examen de Admisión 2027",
+  sub:"Simulacro de admisión",
+  logo:"ADMISIÓN",
+  duracion:60,
+  notaMin:60,
+  aleatorio:false,
+  mezclarAlt:false,
+  resultados:true,
+  antifraude:true,
+  maxSalidas:3,
+  maxSegFuera:60,
+  preguntas:[
+    {t:"Razonamiento Matemático", p:"Si 3 obreros construyen un muro en 12 días, ¿en cuántos días lo construirán 4 obreros trabajando al mismo ritmo?",
+     o:["6 días","9 días","12 días","16 días"], c:1, e:"Es inversamente proporcional: 3 × 12 = 4 × x, entonces x = 9 días."},
+    {t:"Razonamiento Verbal", p:"Señala el sinónimo más preciso de la palabra EFÍMERO.",
+     o:["Eterno","Pasajero","Profundo","Valioso"], c:1, e:"Efímero significa de corta duración, por lo tanto pasajero."},
+    {t:"Aritmética", p:"El 30 % de 250 es igual a:",
+     o:["65","70","75","80"], c:2, e:"250 × 0,30 = 75."},
+    {t:"Comprensión Lectora", p:"\"La minería formal aporta divisas y empleo, pero exige estándares ambientales estrictos para ser sostenible.\"\n\nEl texto sostiene principalmente que la minería formal:",
+     o:["Debe prohibirse por contaminar","Solo genera empleo temporal","Es beneficiosa si cumple estándares ambientales","No tiene relación con las divisas"], c:2,
+     e:"La idea central condiciona el beneficio de la minería al cumplimiento de estándares ambientales."},
+    {t:"Cultura General", p:"¿Cuál es el organismo del Estado peruano encargado del sector minero y energético?",
+     o:["MINAM","MINEM","OSINERGMIN","INGEMMET"], c:1, e:"El Ministerio de Energía y Minas (MINEM) rige el sector."}
+  ],
+  reglas:[
+    "El examen es individual: no se permite ayuda de terceros ni material de consulta.",
+    "Una vez iniciado, el cronómetro no se detiene aunque cierres la ventana.",
+    "Puedes avanzar, retroceder y marcar preguntas para revisarlas antes de enviar.",
+    "Al terminar el tiempo el examen se envía automáticamente con lo respondido.",
+    "Solo se admite una respuesta por pregunta.",
+    "No debes salir de la página ni cambiar de pestaña: el sistema lo detecta y puede anular tu examen."
+  ]
+};
+
+/* ---------- Utilidades ---------- */
+function b64enc(obj){ return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replace(/\+/g,"-").replace(/\//g,"_"); }
+function b64dec(s){ try{ return JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g,"+").replace(/_/g,"/"))))); }catch(e){ return null; } }
+function save(cfg){ try{ localStorage.setItem(KEY, JSON.stringify(cfg)); }catch(e){} }
+function load(){ try{ const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; }catch(e){ return null; } }
+function shuffle(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]];} return b; }
+function toast(msg){ const t=el("div","toast",msg); document.body.appendChild(t); setTimeout(()=>t.remove(),2600); }
+function mmss(s){ const m=Math.floor(s/60), r=s%60; return String(m).padStart(2,"0")+":"+String(r).padStart(2,"0"); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function modal(titulo, cuerpo, acciones){
+  const root=$("#modal-root");
+  const m=el("div","modal");
+  const box=el("div","modal-box");
+  box.innerHTML = "<h3>"+titulo+"</h3>"+cuerpo;
+  const acts=el("div","modal-acts");
+  acciones.forEach(a=>{ const b=el("button","btn "+(a.cls||"ghost"),a.txt); b.onclick=()=>{ root.innerHTML=""; a.fn&&a.fn(); }; acts.appendChild(b); });
+  box.appendChild(acts); m.appendChild(box); root.innerHTML=""; root.appendChild(m);
+}
+function show(id){ ["view-acceso","view-reglas","view-examen","view-res","view-editor"].forEach(v=>$("#"+v).classList.toggle("hide", v!==id)); window.scrollTo(0,0); }
+
+/* ---------- Estado ---------- */
+let CFG = null;        // examen actual
+let MODO_ALUMNO = false; // true si llegó por enlace compartido
+let S = null;          // sesión de examen
+let tick = null;
+
+/* ---------- Carga inicial ---------- */
+(function init(){
+  const h = location.hash || "";
+  const m = h.match(/[#&]e=([^&]+)/);
+  if(m){
+    const c = b64dec(m[1]);
+    if(c && c.preguntas && c.preguntas.length){ CFG = normalizar(c); MODO_ALUMNO = true; }
+  }
+  if(!CFG) CFG = normalizar(load() || DEFAULT);
+  if(MODO_ALUMNO) $("#lnk-editor").classList.add("hide");
+  pintarAcceso();
+  show("view-acceso");
+})();
+
+function normalizar(c){
+  const d = Object.assign({}, DEFAULT, c);
+  d.preguntas = (c.preguntas||[]).map(q=>({
+    t:q.t||"", p:q.p||"", o:(q.o||[]).slice(), c:(typeof q.c==="number"?q.c:0), e:q.e||"", img:q.img||""
+  }));
+  if(!Array.isArray(d.reglas) || !d.reglas.length) d.reglas = DEFAULT.reglas;
+  return d;
+}
+
+/* ---------- Pantalla de acceso ---------- */
+function pintarAcceso(){
+  $("#ac-titulo").textContent = CFG.titulo;
+  $("#ac-sub").textContent = CFG.titulo;
+  $("#ac-logo").textContent = CFG.logo || "EXAMEN";
+  $("#ac-desc").textContent = CFG.sub || "Ingresa tus datos para iniciar la evaluación.";
+  $("#ac-meta").textContent = CFG.preguntas.length + " preguntas · " + CFG.duracion + " minutos";
+  document.title = CFG.titulo;
+}
+
+$("#lnk-reglas").onclick = ()=> modal("Reglas de ética del postulante",
+  "<p>"+CFG.reglas.map(r=>"• "+esc(r)).join("<br>")+"</p>", [{txt:"Entendido",cls:"",fn:null}]);
+
+$("#btn-ingresar").onclick = ()=>{
+  const n=$("#in-nombre").value.trim(), d=$("#in-dni").value.trim(), a=$("#in-acepto").checked;
+  if(!n){ $("#ac-err").textContent="Escribe el nombre del postulante."; return; }
+  if(!a){ $("#ac-err").textContent="Debes aceptar las reglas de ética."; return; }
+  if(!CFG.preguntas.length){ $("#ac-err").textContent="Este examen aún no tiene preguntas."; return; }
+  $("#ac-err").textContent="";
+  S = { nombre:n, dni:d };
+  pintarReglas();
+  show("view-reglas");
+};
+$("#in-nombre").addEventListener("keydown", e=>{ if(e.key==="Enter") $("#in-dni").focus(); });
+$("#in-dni").addEventListener("keydown", e=>{ if(e.key==="Enter") $("#btn-ingresar").click(); });
+$("#lnk-editor").onclick = ()=>{ cargarEditor(); show("view-editor"); };
+$("#btn-volver-acceso").onclick = ()=> show("view-acceso");
+
+function pintarReglas(){
+  $("#rg-titulo").textContent = CFG.titulo;
+  $("#rg-resumen").innerHTML =
+    "Postulante <b>"+esc(S.nombre)+"</b>"+
+    "<br>Preguntas <b>"+CFG.preguntas.length+"</b>"+
+    "<br>Duración <b>"+CFG.duracion+" minutos</b>"+
+    "<br>Nota mínima <b>"+CFG.notaMin+"%</b>"+
+    (CFG.antifraude ? "<br>Salidas permitidas <b>"+(CFG.maxSalidas-1)+"</b>" : "");
+  $("#rg-reglas").innerHTML = CFG.reglas.map(r=>"• "+esc(r)).join("<br>")
+    + (CFG.antifraude ? '<div style="margin-top:16px;padding:14px 16px;border-radius:10px;background:#fff7ed;border-left:3px solid var(--amber);color:#9a6a08">'+
+       '<b>Vigilancia activa.</b> Si cambias de pestaña o minimizas la ventana, queda registrado. '+
+       'A la salida n.º '+CFG.maxSalidas+', o si permaneces más de '+CFG.maxSegFuera+' segundos fuera, tu examen se anula automáticamente.</div>' : "");
+}
+
+/* ---------- Motor del examen ---------- */
+$("#btn-empezar").onclick = iniciarExamen;
+
+function iniciarExamen(){
+  let qs = CFG.preguntas.map((q,i)=>{
+    let opts = q.o.map((txt,j)=>({txt, ok:j===q.c}));
+    if(CFG.mezclarAlt) opts = shuffle(opts);
+    return { orig:i, tema:q.t, texto:q.p, img:q.img, expl:q.e, opts };
+  });
+  if(CFG.aleatorio) qs = shuffle(qs);
+  S.qs = qs;
+  S.resp = new Array(qs.length).fill(null);
+  S.vistas = new Array(qs.length).fill(false);
+  S.flags = new Array(qs.length).fill(false);
+  S.idx = 0;
+  S.restante = CFG.duracion*60;
+  S.inicio = new Date();
+  S.salidas = 0;
+  S.registro = [];
+  S.descalificado = false;
+  S.terminado = false;
+  $("#ex-titulo").textContent = CFG.titulo;
+  $("#ex-postulante").textContent = S.nombre;
+  construirGrid();
+  pintarPregunta();
+  pintarAvisos();
+  show("view-examen");
+  clearInterval(tick);
+  tick = setInterval(()=>{
+    S.restante--;
+    pintarTimer();
+    if(S.restante<=0){ clearInterval(tick); enviar(true); }
+  },1000);
+  pintarTimer();
+}
+
+function pintarTimer(){
+  const t=$("#ex-timer");
+  t.textContent = mmss(Math.max(0,S.restante));
+  t.classList.toggle("warn", S.restante<=300 && S.restante>60);
+  t.classList.toggle("danger", S.restante<=60);
+}
+
+function construirGrid(){
+  const g=$("#grid-n"); g.innerHTML="";
+  S.qs.forEach((q,i)=>{
+    const b=el("button","gn",String(i+1));
+    b.onclick=()=>{ S.idx=i; pintarPregunta(); };
+    g.appendChild(b);
+  });
+}
+
+function pintarGrid(){
+  [...$("#grid-n").children].forEach((b,i)=>{
+    b.className = "gn"
+      + (S.resp[i]!==null ? " ans" : (S.vistas[i] ? " seen" : ""))
+      + (S.flags[i] ? " flag" : "")
+      + (i===S.idx ? " cur" : "");
+  });
+}
+
+function pintarPregunta(){
+  const i=S.idx, q=S.qs[i];
+  S.vistas[i]=true;
+  $("#q-num").textContent = "PREGUNTA "+(i+1);
+  $("#q-tema").textContent = q.tema || "";
+  $("#q-text").textContent = q.texto;
+  const img=$("#q-img");
+  if(q.img){ img.src=q.img; img.classList.remove("hide"); } else { img.classList.add("hide"); img.removeAttribute("src"); }
+  const cont=$("#q-opts"); cont.innerHTML="";
+  q.opts.forEach((o,j)=>{
+    const d=el("div","opt"+(S.resp[i]===j?" sel":""));
+    d.innerHTML='<div class="letra">'+LETRAS[j]+'</div><div class="txt">'+esc(o.txt)+'</div>';
+    d.onclick=()=>{ S.resp[i]=j; pintarPregunta(); };
+    cont.appendChild(d);
+  });
+  $("#chk-marcar").checked = S.flags[i];
+  $("#ex-contador").textContent = (i+1)+" / "+S.qs.length;
+  $("#ex-progress").style.width = (S.resp.filter(r=>r!==null).length/S.qs.length*100)+"%";
+  $("#btn-prev").disabled = i===0;
+  const ultima = i===S.qs.length-1;
+  $("#btn-next").textContent = ultima ? "Finalizar" : "Siguiente";
+  $("#btn-next").classList.toggle("dark", ultima);
+  pintarGrid();
+}
+
+$("#btn-prev").onclick = ()=>{ if(S.idx>0){S.idx--;pintarPregunta();} };
+$("#btn-next").onclick = ()=>{ if(S.idx<S.qs.length-1){S.idx++;pintarPregunta();} else { $("#btn-finalizar").click(); } };
+$("#btn-limpiar").onclick = ()=>{ S.resp[S.idx]=null; pintarPregunta(); };
+$("#chk-marcar").onchange = e=>{ S.flags[S.idx]=e.target.checked; pintarGrid(); };
+
+document.addEventListener("keydown", e=>{
+  if($("#view-examen").classList.contains("hide")) return;
+  if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA") return;
+  if(e.key==="ArrowRight" && S.idx<S.qs.length-1) $("#btn-next").click();
+  if(e.key==="ArrowLeft") $("#btn-prev").click();
+  const n=parseInt(e.key,10);
+  if(n>=1 && n<=S.qs[S.idx].opts.length){ S.resp[S.idx]=n-1; pintarPregunta(); }
+});
+
+/* --- Vigilancia: salidas de la página --- */
+let fueraTimer = null;
+
+function enExamen(){ return S && S.qs && !$("#view-examen").classList.contains("hide") && !S.terminado; }
+
+function pintarAvisos(){
+  const p=$("#ex-avisos");
+  if(!CFG.antifraude){ p.classList.add("hide"); return; }
+  p.classList.remove("hide");
+  p.textContent = "Salidas "+S.salidas+"/"+CFG.maxSalidas;
+  p.classList.toggle("warn", S.salidas>0 && S.salidas<CFG.maxSalidas-1);
+  p.classList.toggle("danger", S.salidas>=CFG.maxSalidas-1);
+}
+
+document.addEventListener("visibilitychange", ()=>{
+  if(!CFG.antifraude || !enExamen()) return;
+
+  if(document.hidden){
+    S.fueraDesde = Date.now();
+    clearTimeout(fueraTimer);
+    fueraTimer = setTimeout(()=>{
+      if(document.hidden && enExamen()) descalificar("Permaneciste fuera de la página más de "+CFG.maxSegFuera+" segundos.");
+    }, CFG.maxSegFuera*1000);
+    return;
+  }
+
+  clearTimeout(fueraTimer);
+  const seg = Math.round((Date.now() - (S.fueraDesde||Date.now()))/1000);
+  S.salidas++;
+  S.registro.push({n:S.salidas, seg, hora:new Date().toLocaleTimeString("es-PE")});
+  pintarAvisos();
+
+  if(seg >= CFG.maxSegFuera){
+    descalificar("Permaneciste "+seg+" segundos fuera de la página (máximo permitido: "+CFG.maxSegFuera+").");
+    return;
+  }
+  if(S.salidas >= CFG.maxSalidas){
+    descalificar("Saliste de la página "+S.salidas+" veces (máximo permitido: "+(CFG.maxSalidas-1)+").");
+    return;
+  }
+
+  const restantes = CFG.maxSalidas - S.salidas;
+  modal("⚠ Advertencia "+S.salidas+" de "+CFG.maxSalidas,
+    '<p>Saliste de la página durante <b>'+seg+' segundo(s)</b>. Esto quedó registrado.</p>'+
+    '<div class="resumen" style="border-color:#f3c98b;background:#fffaf0">Salidas registradas <b>'+S.salidas+'</b>'+
+    '<br>Te queda(n) <b>'+restantes+'</b> antes de la descalificación</div>'+
+    '<p>Si sales '+restantes+' vez(ces) más, o permaneces más de '+CFG.maxSegFuera+' segundos fuera, tu examen será anulado.</p>',
+    [{txt:"Entiendo, continuar",cls:""}]);
+});
+
+function descalificar(motivo){
+  if(!enExamen()) return;
+  clearTimeout(fueraTimer);
+  clearInterval(tick);
+  S.descalificado = true;
+  S.motivo = motivo;
+  $("#modal-root").innerHTML="";
+  enviar(false);
+}
+
+$("#btn-finalizar").onclick = ()=>{
+  const sin = S.resp.filter(r=>r===null).length;
+  const marc = S.flags.filter(Boolean).length;
+  modal("¿Enviar el examen?",
+    '<div class="resumen">Respondidas <b>'+(S.qs.length-sin)+' de '+S.qs.length+'</b>'+
+    '<br>Sin responder <b>'+sin+'</b>'+
+    '<br>Marcadas para revisar <b>'+marc+'</b>'+
+    '<br>Tiempo restante <b>'+mmss(Math.max(0,S.restante))+'</b></div>'+
+    '<p>Una vez enviado no podrás modificar tus respuestas.</p>',
+    [{txt:"Seguir revisando"},{txt:"Enviar examen",cls:"",fn:()=>enviar(false)}]);
+};
+
+function enviar(porTiempo){
+  clearInterval(tick);
+  clearTimeout(fueraTimer);
+  S.terminado = true;
+  let ok=0, mal=0, vac=0;
+  S.qs.forEach((q,i)=>{
+    if(S.resp[i]===null) vac++;
+    else if(q.opts[S.resp[i]].ok) ok++;
+    else mal++;
+  });
+  S.ok=ok; S.mal=mal; S.vac=vac;
+  S.pct = Math.round(ok/S.qs.length*100);
+  S.fin = new Date();
+  pintarResultados(porTiempo);
+  show("view-res");
+}
+
+/* ---------- Resultados ---------- */
+function pintarResultados(porTiempo){
+  const desc = !!S.descalificado;
+  const aprob = !desc && S.pct >= CFG.notaMin;
+  $("#rs-titulo").textContent = CFG.titulo + " — Resultados";
+  $("#rs-nombre").textContent = S.nombre + (S.dni ? " · "+S.dni : "");
+  $("#rs-fecha").textContent = S.fin.toLocaleString("es-PE") + (porTiempo ? " · enviado por tiempo agotado" : "");
+  $("#rs-ring").style.background = desc
+    ? "conic-gradient(var(--red) 360deg,var(--red) 0deg)"
+    : "conic-gradient("+(aprob?"var(--accent)":"var(--red)")+" "+(S.pct*3.6)+"deg,#e9efec 0deg)";
+  const mostrar = CFG.resultados && !desc;
+  $("#rs-nota").textContent = desc ? "✕" : (mostrar ? S.pct+"%" : "✓");
+  $("#rs-escala").textContent = desc ? "ANULADO" : (mostrar ? "PUNTAJE" : "ENVIADO");
+  $("#rs-estado").innerHTML = desc
+    ? '<span class="estado no">DESCALIFICADO</span>'
+    : (mostrar
+      ? '<span class="estado '+(aprob?"ok":"no")+'">'+(aprob?"APROBADO":"NO APROBADO")+'</span>'
+      : '<span class="estado ok">EXAMEN ENVIADO</span>');
+  const mins = Math.round((S.fin-S.inicio)/60000);
+  const nota20 = (S.ok/S.qs.length*20).toFixed(1);
+  $("#rs-stats").innerHTML = mostrar ? [
+    ['<b style="color:var(--accent-d)">'+S.ok+'</b><span>Correctas</span>'],
+    ['<b style="color:var(--red)">'+S.mal+'</b><span>Incorrectas</span>'],
+    ['<b style="color:var(--muted)">'+S.vac+'</b><span>Sin responder</span>'],
+    ['<b>'+nota20+'</b><span>Nota vigesimal</span>'],
+    ['<b>'+mins+"'"+'</b><span>Tiempo usado</span>']
+  ].map(s=>'<div class="stat">'+s+'</div>').join('')
+   : '<div class="stat"><b>'+S.qs.length+'</b><span>Preguntas</span></div><div class="stat"><b>'+mins+"'"+'</b><span>Tiempo usado</span></div>';
+
+  const rev=$("#rs-revision"); rev.innerHTML="";
+
+  if(desc){
+    rev.innerHTML = '<div class="panel" style="border-left:4px solid var(--red)">'+
+      '<h4 style="color:var(--red)">Examen anulado</h4>'+
+      '<p style="font-size:15px;line-height:1.7;margin:0 0 14px">'+esc(S.motivo)+'</p>'+
+      '<div class="resumen">Preguntas respondidas <b>'+(S.qs.length-S.vac)+' de '+S.qs.length+'</b>'+
+      '<br>Salidas registradas <b>'+S.salidas+'</b></div>'+
+      (S.registro.length ? '<div style="font-size:13.5px;color:var(--muted);line-height:2">'+
+        S.registro.map(r=>'Salida '+r.n+' — '+r.seg+' s fuera, a las '+r.hora).join('<br>')+'</div>' : '')+
+      '<p style="font-size:13.5px;color:var(--muted);margin:14px 0 0">El puntaje no se calcula en un examen anulado.</p></div>';
+    return;
+  }
+
+  if(!mostrar){
+    rev.innerHTML = '<div class="panel" style="text-align:center;color:var(--muted)">Las respuestas no se muestran en este examen.</div>';
+    return;
+  }
+  if(S.salidas) rev.innerHTML = '<div class="panel" style="color:#9a6a08;border-left:4px solid var(--amber)">⚠ Salió de la página '+S.salidas+
+    ' vez(ces) durante el examen: '+S.registro.map(r=>r.seg+' s a las '+r.hora).join(' · ')+'</div>';
+  S.qs.forEach((q,i)=>{
+    const r=S.resp[i];
+    const correcta = q.opts.findIndex(o=>o.ok);
+    const estado = r===null ? ["vacia","SIN RESPONDER"] : (q.opts[r].ok ? ["ok","CORRECTA"] : ["no","INCORRECTA"]);
+    const c=el("div","rev");
+    c.innerHTML = '<div class="q-head"><div class="q-num">PREGUNTA '+(i+1)+(q.tema?' · '+esc(q.tema):'')+'</div>'+
+      '<span class="tag '+estado[0]+'">'+estado[1]+'</span></div>'+
+      '<p class="q-text" style="font-size:16px">'+esc(q.texto)+'</p>'+
+      q.opts.map((o,j)=>{
+        let cls="opt";
+        if(j===correcta) cls+=" ok";
+        else if(j===r) cls+=" bad";
+        return '<div class="'+cls+'" style="cursor:default"><div class="letra">'+LETRAS[j]+'</div><div class="txt">'+esc(o.txt)+
+          (j===correcta?' <b style="color:var(--accent-d)">✓ respuesta correcta</b>':'')+
+          (j===r&&j!==correcta?' <b style="color:var(--red)">← tu respuesta</b>':'')+'</div></div>';
+      }).join('')+
+      (q.expl?'<div class="expl"><b>Explicación:</b> '+esc(q.expl)+'</div>':'');
+    rev.appendChild(c);
+  });
+}
+$("#btn-imprimir").onclick = ()=>window.print();
+$("#btn-reiniciar").onclick = ()=>{ show("view-acceso"); $("#in-acepto").checked=false; };
+
+/* ---------- Editor ---------- */
+function cargarEditor(){
+  $("#ed-titulo").value=CFG.titulo; $("#ed-sub").value=CFG.sub; $("#ed-dur").value=CFG.duracion;
+  $("#ed-min").value=CFG.notaMin; $("#ed-logo").value=CFG.logo;
+  $("#ed-aleatorio").checked=!!CFG.aleatorio; $("#ed-mezclaralt").checked=!!CFG.mezclarAlt;
+  $("#ed-resultados").checked=!!CFG.resultados; $("#ed-antifraude").checked=!!CFG.antifraude;
+  $("#ed-maxsal").value=CFG.maxSalidas; $("#ed-maxseg").value=CFG.maxSegFuera;
+  $("#ed-af-cfg").style.opacity = CFG.antifraude ? "1" : ".45";
+  pintarPreguntasEd();
+}
+
+function pintarPreguntasEd(){
+  const L=$("#ed-lista"); L.innerHTML="";
+  $("#ed-count").textContent=CFG.preguntas.length;
+  CFG.preguntas.forEach((q,i)=>{
+    const d=el("div","q-edit");
+    const head=el("div","qe-head");
+    head.innerHTML='<b>PREGUNTA '+(i+1)+'</b>';
+    const tools=el("div");
+    [["↑",()=>mover(i,-1)],["↓",()=>mover(i,1)],["Duplicar",()=>{CFG.preguntas.splice(i+1,0,JSON.parse(JSON.stringify(q)));pintarPreguntasEd();}],["Eliminar",()=>{CFG.preguntas.splice(i,1);pintarPreguntasEd();}]]
+      .forEach(([t,fn])=>{ const b=el("button","btn ghost sm",t); b.style.marginLeft="6px"; b.onclick=fn; tools.appendChild(b); });
+    head.appendChild(tools); d.appendChild(head);
+
+    const tema=el("input","in"); tema.placeholder="Curso o tema (opcional)"; tema.value=q.t;
+    tema.style.marginBottom="10px"; tema.oninput=e=>q.t=e.target.value; d.appendChild(tema);
+
+    const txt=el("textarea","in"); txt.rows=3; txt.placeholder="Escribe el enunciado de la pregunta"; txt.value=q.p;
+    txt.style.marginBottom="12px"; txt.oninput=e=>q.p=e.target.value; d.appendChild(txt);
+
+    q.o.forEach((o,j)=>{
+      const r=el("div","alt-row");
+      const radio=el("input"); radio.type="radio"; radio.name="corr"+i; radio.checked=q.c===j;
+      radio.onchange=()=>{ q.c=j; };
+      const lab=el("span","l",LETRAS[j]);
+      const inp=el("input","in"); inp.value=o; inp.placeholder="Alternativa "+LETRAS[j];
+      inp.oninput=e=>q.o[j]=e.target.value;
+      const x=el("button","x","×"); x.onclick=()=>{ if(q.o.length<=2){toast("Mínimo 2 alternativas");return;} q.o.splice(j,1); if(q.c>=q.o.length)q.c=0; pintarPreguntasEd(); };
+      r.append(radio,lab,inp,x); d.appendChild(r);
+    });
+    const addAlt=el("button","btn ghost sm","+ Alternativa"); addAlt.style.margin="4px 0 12px";
+    addAlt.onclick=()=>{ if(q.o.length>=6){toast("Máximo 6");return;} q.o.push(""); pintarPreguntasEd(); };
+    d.appendChild(addAlt);
+
+    const ex=el("textarea","in"); ex.rows=2; ex.placeholder="Explicación de la respuesta (opcional, se muestra al corregir)"; ex.value=q.e;
+    ex.oninput=e=>q.e=e.target.value; d.appendChild(ex);
+    L.appendChild(d);
+  });
+}
+function mover(i,dir){ const j=i+dir; if(j<0||j>=CFG.preguntas.length) return;
+  const t=CFG.preguntas[i]; CFG.preguntas[i]=CFG.preguntas[j]; CFG.preguntas[j]=t; pintarPreguntasEd(); }
+
+$("#ed-antifraude").addEventListener("change", e=>{
+  $("#ed-af-cfg").style.opacity = e.target.checked ? "1" : ".45";
+});
+
+$("#btn-add-q").onclick = ()=>{ CFG.preguntas.push({t:"",p:"",o:["","","",""],c:0,e:"",img:""}); pintarPreguntasEd();
+  window.scrollTo(0,document.body.scrollHeight); };
+
+$("#btn-add-lote").onclick = ()=>{
+  modal("Pegar varias preguntas",
+    '<p>Una pregunta por bloque. Marca la correcta con un asterisco <b>*</b> al inicio de la alternativa. Separa las preguntas con una línea en blanco.</p>'+
+    '<textarea class="in" id="lote" rows="9" placeholder="¿Cuánto es 30% de 250?\n65\n70\n*75\n80\n\nSinónimo de efímero\neterno\n*pasajero\nprofundo\nvalioso"></textarea>',
+    [{txt:"Cancelar"},{txt:"Agregar",cls:"",fn:()=>{}}]);
+  setTimeout(()=>{
+    const btns=document.querySelectorAll(".modal .btn");
+    if(btns.length<2) return;
+    btns[1].onclick=()=>{
+      const v=document.getElementById("lote").value;
+      const bloques=v.split(/\n\s*\n/).map(b=>b.trim()).filter(Boolean);
+      let n=0;
+      bloques.forEach(b=>{
+        const ls=b.split("\n").map(x=>x.trim()).filter(Boolean);
+        if(ls.length<3) return;
+        const p=ls[0].replace(/^\d+[\.\)]\s*/,"");
+        const opts=ls.slice(1), o=[]; let c=0;
+        opts.forEach((x,i)=>{ const m=x.startsWith("*"); if(m)c=i; o.push(x.replace(/^\*/,"").replace(/^[a-eA-E][\.\)]\s*/,"").trim()); });
+        CFG.preguntas.push({t:"",p,o,c,e:"",img:""}); n++;
+      });
+      $("#modal-root").innerHTML=""; pintarPreguntasEd(); toast(n+" pregunta(s) agregada(s)");
+    };
+  },0);
+};
+
+function leerEditor(){
+  CFG.titulo=$("#ed-titulo").value.trim()||"Examen de Admisión";
+  CFG.sub=$("#ed-sub").value.trim();
+  CFG.duracion=Math.max(1,parseInt($("#ed-dur").value,10)||60);
+  CFG.notaMin=Math.min(100,Math.max(0,parseInt($("#ed-min").value,10)||0));
+  CFG.logo=$("#ed-logo").value.trim()||"EXAMEN";
+  CFG.aleatorio=$("#ed-aleatorio").checked; CFG.mezclarAlt=$("#ed-mezclaralt").checked;
+  CFG.resultados=$("#ed-resultados").checked; CFG.antifraude=$("#ed-antifraude").checked;
+  CFG.maxSalidas=Math.min(10,Math.max(1,parseInt($("#ed-maxsal").value,10)||3));
+  CFG.maxSegFuera=Math.min(600,Math.max(5,parseInt($("#ed-maxseg").value,10)||60));
+  CFG.preguntas=CFG.preguntas.filter(q=>q.p.trim() && q.o.filter(o=>o.trim()).length>=2);
+}
+
+$("#btn-guardar").onclick = ()=>{ leerEditor(); save(CFG); pintarPreguntasEd(); pintarAcceso(); toast("Examen guardado en este navegador"); };
+$("#btn-probar").onclick = ()=>{ leerEditor(); save(CFG); pintarAcceso();
+  if(!CFG.preguntas.length){ toast("Agrega al menos una pregunta completa"); return; }
+  show("view-acceso"); };
+$("#btn-salir-editor").onclick = ()=>{ leerEditor(); save(CFG); pintarAcceso(); show("view-acceso"); };
+
+$("#btn-codigo").onclick = ()=>{
+  leerEditor(); save(CFG);
+  if(!CFG.preguntas.length){ toast("Agrega preguntas primero"); return; }
+  const cod = "EXAM1-" + b64enc(CFG);
+  const ta=$("#out-link"); ta.classList.remove("hide"); ta.value=cod;
+  $("#cod-help").classList.remove("hide");
+  ta.focus(); ta.select();
+  try{ navigator.clipboard.writeText(cod).then(()=>toast("Código copiado"),()=>toast("Copia el código del recuadro")); }
+  catch(e){ toast("Copia el código del recuadro"); }
+};
+
+function pedirCodigo(despues){
+  modal("Pegar código de examen",
+    '<p>Pega aquí el código que te enviaron (empieza con EXAM1-).</p>'+
+    '<textarea class="in" id="cod-in" rows="5" style="font-size:12px"></textarea>'+
+    '<div class="err" id="cod-err"></div>',
+    [{txt:"Cancelar"},{txt:"Cargar examen",cls:"",fn:null}]);
+  setTimeout(()=>{
+    const btns=document.querySelectorAll(".modal .btn");
+    if(btns.length<2) return;
+    btns[1].onclick=()=>{
+      const v=(document.getElementById("cod-in").value||"").trim().replace(/^EXAM1-/,"").replace(/\s+/g,"");
+      const c=b64dec(v);
+      if(!c || !c.preguntas || !c.preguntas.length){ document.getElementById("cod-err").textContent="El código no es válido."; return; }
+      CFG = normalizar(c); save(CFG); pintarAcceso();
+      $("#modal-root").innerHTML="";
+      toast("Examen cargado: "+CFG.titulo);
+      despues && despues();
+    };
+  },0);
+}
+$("#btn-cargar-cod").onclick = ()=> pedirCodigo(()=>cargarEditor());
+$("#lnk-codigo").onclick = ()=> pedirCodigo(null);
+})();
+</script>
+</body>
+</html>

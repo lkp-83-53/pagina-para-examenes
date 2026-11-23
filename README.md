@@ -70,3 +70,30 @@ incrustada como data URL, o queda vacío.
 
 Es un único archivo `index.html` sin build ni dependencias: funciona abriéndolo directo
 o publicado en GitHub Pages.
+
+## Scripts
+
+En `scripts\` hay la misma utilidad en dos sabores: `.ps1` para PowerShell y `.sh` para Git Bash.
+
+| Script | Para qué |
+|---|---|
+| `vincular-git` | Enlaza la carpeta local con este repositorio. Se corre una sola vez. |
+| `publicar` | `add` + `commit` + `push` en un paso. Acepta el mensaje como argumento. |
+| `servir` | Levanta `http://localhost:8080` y abre el navegador. |
+
+```powershell
+# PowerShell, desde C:\Users\nvill\pagina-para-examen
+.\scripts\vincular-git.ps1
+.\scripts\publicar.ps1 "agrego balotario de geometria"
+.\scripts\servir.ps1
+```
+
+```bash
+# Git Bash, desde la misma carpeta
+./scripts/vincular-git.sh
+./scripts/publicar.sh "agrego balotario de geometria"
+./scripts/servir.sh
+```
+
+Si PowerShell bloquea los `.ps1`, habilita los scripts del usuario una sola vez:
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`

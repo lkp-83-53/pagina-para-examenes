@@ -77,6 +77,9 @@ La página trae exámenes ya cargados, que aparecen en un desplegable en la pant
 
 | Balotario | Contenido |
 |---|---|
+| **Matemáticas** | 30 preguntas: RM (6), aritmética (6), álgebra (8), geometría (5), trigonometría (5). 60 min |
+| **Letras** | 30 preguntas: RV (7), literatura (5), lenguaje (5), historia (4), comprensión lectora (4), geografía (2), economía, cívica y filosofía. 50 min |
+| **Ciencias** | 30 preguntas: física (10), química (10), biología (10). 60 min |
 | Examen de Admisión — Banco General | **90 preguntas, 30 por examen.** Nivel San Marcos / Callao, todas las materias |
 | Álgebra — Admisión San Marcos | 26 preguntas: lógica proposicional, exponentes, productos notables, ecuaciones, división de polinomios, inecuaciones, valor absoluto, funciones, logaritmos, complejos y análisis dimensional |
 | Simulacro de muestra | 7 preguntas de prueba, para ver cómo funciona |
